@@ -2,20 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
 public class PlayerController : MonoBehaviour
 {
-    public GameObject playerPrefab;
-    public DynamicJoystick joystick;
-    public float speed;
+    [SerializeField] private DynamicJoystick _joystick;
+    [SerializeField] private GameObject _playerObj;
+    [SerializeField] private int _speed;
+
+    private Animator _animator;
+
+    private void Start()
+    {
+        _animator = GetComponent<Animator>();   
+    }
 
     public void Update()
     {
-        float degrees = ((Mathf.Atan2(joystick.Vertical, joystick.Horizontal) + 2f * Mathf.PI) * 180f / Mathf.PI) % 360f;
+        _animator.SetBool(AnimatorKeys.Running, _joystick.IsTouch);
+        
+        // float degrees = ((Mathf.Atan2(joystick.Vertical, joystick.Horizontal) + 2f * Mathf.PI) * 180f / Mathf.PI) % 360f;
 
-        Vector3 direction = Vector3.forward * joystick.Vertical + Vector3.right * joystick.Horizontal;
-        Debug.Log(joystick.Direction);
+        Vector3 direction = Vector3.forward * _joystick.Vertical + Vector3.right * _joystick.Horizontal;
 
-        transform.Translate(direction * speed * Time.deltaTime);
-        playerPrefab.transform.rotation = Quaternion.Euler(0, degrees, 0);
+        transform.Translate(direction * _speed * Time.deltaTime);
+
+        Vector3 relativePos = _playerObj.transform.position;
+        relativePos.Set(_joystick.Horizontal, 0, _joystick.Vertical);
+        _playerObj.transform.rotation = Quaternion.LookRotation(relativePos);
     }
 }
