@@ -16,6 +16,6 @@ public class CameraFollow : MonoBehaviour
 
     void Update()
     {
-        transform.position = player.transform.position + _offset;
+        transform.position = Vector3.Slerp(player.transform.position + _offset, player.transform.position + _offset, 1);
     }
 }

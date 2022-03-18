@@ -11,7 +11,7 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
-        _maxCountOnHands = PlayerPrefs.GetInt("MaxCountOnHands");   
+        _maxCountOnHands = PlayerPrefs.GetInt(Keys.MaxCountOnHands);   
     }
 
     public void AddResourcesOnHands(Resource.ResourceType resource)
@@ -27,6 +27,7 @@ public class Player : MonoBehaviour
     public void IncreaseMaxCountOnHands()
     {
         _maxCountOnHands++;
+        PlayerPrefs.SetInt(Keys.MaxCountOnHands, _maxCountOnHands);
     }
 
     public void DestroyResourcesOnHands()

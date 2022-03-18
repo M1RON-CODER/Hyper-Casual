@@ -8,12 +8,4 @@ public class Resource : MonoBehaviour
     [SerializeField] private ResourceType _resource;
 
     public ResourceType GetResource { get { return _resource; } }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.GetComponent<PlayerController>())
-        {
-
-        }
-    }
 }
