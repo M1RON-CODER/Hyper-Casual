@@ -4,38 +4,72 @@ using UnityEngine;
 
 public class ResourcesController : Resource
 {
+    [SerializeField] private List<Transform> _positionResources = new List<Transform>();
+    [SerializeField] private GameObject _objResource;
     [SerializeField] private GameObject _zone;
+    [SerializeField] private float _delayInstatiate;
 
+    private List<GameObject> _resources = new List<GameObject>();
     private Vector3 _defaultScale;
-    private float size = 1.5f;
+    private float _size = 1.2f;
+    private float _easing = 0.3f;
+    private bool _onTriggerEnter = false; 
 
     private void Start()
     {
         _defaultScale = _zone.transform.localScale;
+        StartCoroutine(InstaiateResources());
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.GetComponent<PlayerController>())
         {
-
+            StartCoroutine(ChangeOfSize(_zone, _zone.transform.localScale * _size, _easing));
+            StartCoroutine(TakeResource());
         }
-        StartCoroutine(ChangeOfSize(_zone.transform.localScale * size));
     }
 
     private void OnTriggerExit(Collider other)
     {
-        StartCoroutine(ChangeOfSize(_defaultScale));
+        StartCoroutine(ChangeOfSize(_zone, _defaultScale, _easing));
     }
 
-    private IEnumerator ChangeOfSize(Vector3 endScale)
+    private IEnumerator TakeResource()
     {
-        float t = 0, easing = 0.3f;
+        foreach(GameObject resource in _resources)
+        {
+            Destroy(resource);
+            yield return new WaitForSeconds(0.05f);
+        }
+    }
+
+    private IEnumerator ChangeOfSize(GameObject obj, Vector3 endScale, float easing)
+    {
+        float t = 0;
         while (t <= 1.0f)
         {
             t += Time.deltaTime / easing;
-            _zone.transform.localScale = Vector3.Lerp(_zone.transform.localScale, endScale, t); 
+            obj.transform.localScale = Vector3.Lerp(obj.transform.localScale, endScale, t); 
             yield return null;
+        }
+    }
+
+    private IEnumerator InstaiateResources()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(_delayInstatiate);
+            for(int i = _resources.Count; i < _positionResources.Count; i++)
+            {
+                GameObject resource = Instantiate(_objResource, _positionResources[i]);
+                
+                Vector3 endScale = resource.transform.localScale;
+                resource.transform.localScale *= 0;
+                StartCoroutine(ChangeOfSize(resource, endScale, _easing));
+
+                _resources.Add(resource);
+            }
         }
     }
 }
