@@ -22,9 +22,9 @@ public class ResourcesController : Resource
     private void OnTriggerEnter(Collider other)
     {
 
-        if (other.gameObject.GetComponent<PlayerController>())
+        if (other.gameObject.TryGetComponent<PlayerController>(out PlayerController playerController))
         {
-            _playerController = other.gameObject.GetComponent<PlayerController>();
+            _playerController = playerController;
 
             if(_resources.Count > 0)
                 StartCoroutine(TakeResource());
@@ -45,7 +45,7 @@ public class ResourcesController : Resource
                 Invoke(nameof(InstantiateResources), _delayInstatiateResources);
                 yield break;
             }
-            
+
             _resources.RemoveAt(i);
          
             yield return new WaitForSeconds(0.05f);

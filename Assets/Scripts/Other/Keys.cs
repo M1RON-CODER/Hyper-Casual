@@ -10,8 +10,8 @@ public class Keys : MonoBehaviour
     public const string Carrying = "Carrying";
 
     // Player Prefs
+    public const string Cash = "Cash";
     public const string MaxCountOnHands = "MaxCountOnHands";
-
-    // Metod names
-    public const string InstaiateResources = "InstaiateResources";
+    public const string PlayerLevel = "PlayerLevel";
+    public const string GetCash = "GetCash";
 }

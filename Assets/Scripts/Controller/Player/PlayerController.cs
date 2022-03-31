@@ -11,7 +11,7 @@ public class PlayerController : Player
     private Animator _animator;
     private string _currentAnimation = Keys.Running;
 
-    public string CurrentAnimation { get { return _currentAnimation; } }
+    public string CurrentAnimation => _currentAnimation;
 
     private void Start()
     {
