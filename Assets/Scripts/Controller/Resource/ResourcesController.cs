@@ -12,8 +12,9 @@ public class ResourcesController : Resource
 
     private List<GameObject> _resources = new List<GameObject>();
     private PlayerController _playerController;
-    private bool _onTriggerEnter = false; 
+    private bool _onTriggerEnter = false;
 
+    #region MonoBehaviour
     private void Start()
     {
         InstantiateResources();
@@ -21,7 +22,6 @@ public class ResourcesController : Resource
 
     private void OnTriggerEnter(Collider other)
     {
-
         if (other.gameObject.TryGetComponent<PlayerController>(out PlayerController playerController))
         {
             _playerController = playerController;
@@ -29,13 +29,21 @@ public class ResourcesController : Resource
             if(_resources.Count > 0)
                 StartCoroutine(TakeResource());
         }
+
+        if(other.gameObject.TryGetComponent<BotController>(out BotController agent))
+        {
+            agent.OnObjectEnter();
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
-
+        if (other.gameObject.TryGetComponent<BotController>(out BotController agent))
+        {
+            agent.OnObjectExit()
+        }
     }
-
+    #endregion
     private IEnumerator TakeResource()
     {
         for(int i = 0; i < _resources.Count;)

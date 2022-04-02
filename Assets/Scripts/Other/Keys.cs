@@ -6,6 +6,7 @@ public class Keys : MonoBehaviour
 {
     // Animation
     public const string Idle = "Idle";
+    public const string Walking = "Walking";
     public const string Running = "Running";
     public const string Carrying = "Carrying";
 

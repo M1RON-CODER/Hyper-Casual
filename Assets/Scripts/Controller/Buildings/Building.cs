@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class Building : MonoBehaviour
 {
-    private class Params
+/*    private class Params
     {
         private System.Action _action;
         private string _key;
@@ -58,9 +58,9 @@ public class Building : MonoBehaviour
         if (_collider.GetComponent<PlayerController>())
         {
             PlayerController player = _collider.GetComponent<PlayerController>();
-            if (player.Cash >= _prices[_level])
+            if (player.CashData.Cash >= _prices[_level])
             {
-                player.WithdrawCash(_prices[_level]);
+                player.CashData.WithdrawCash(_prices[_level]);
                 _level++;
                 _price.text = _prices[_level].ToString();
 
@@ -84,5 +84,5 @@ public class Building : MonoBehaviour
     {
         _collider = other;
         _methodLookup[_method].Action?.Invoke();
-    }
+    }*/
 }

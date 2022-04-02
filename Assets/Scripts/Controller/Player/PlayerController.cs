@@ -15,6 +15,7 @@ public class PlayerController : Player
 
     public string CurrentAnimation => _currentAnimation;
 
+    #region MonoBehaviour
     private void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
@@ -36,6 +37,7 @@ public class PlayerController : Player
             PlayerObj.transform.rotation = Quaternion.LookRotation(relativePos);
         }
     }
+    #endregion
 
     public bool AddResourcesOnHands(Resource.ResourceType resource, GameObject obj)
     {
