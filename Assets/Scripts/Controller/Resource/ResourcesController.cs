@@ -8,10 +8,10 @@ public class ResourcesController : Resource
     [SerializeField] private List<Transform> _positionResources = new List<Transform>();
     [SerializeField] private GameObject _objResource;
     [SerializeField] private float _delayInstatiateResources;
+    [SerializeField] private float _easing = 0.3f;
 
     private List<GameObject> _resources = new List<GameObject>();
     private PlayerController _playerController;
-    private float _easing = 0.3f;
     private bool _onTriggerEnter = false; 
 
     private void Start()

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Animator))]
 public class PlayerController : Player
 {
@@ -9,22 +10,24 @@ public class PlayerController : Player
     [SerializeField] private int _speed;
 
     private Animator _animator;
+    private Rigidbody _rigidbody;
     private string _currentAnimation = Keys.Running;
 
     public string CurrentAnimation => _currentAnimation;
 
     private void Start()
     {
+        _rigidbody = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();   
     }
 
-    public void Update()
+    public void FixedUpdate()
     {
         _animator.SetBool(_currentAnimation, _joystick.IsTouch);
 
         Vector3 direction = Vector3.forward * _joystick.Vertical + Vector3.right * _joystick.Horizontal;
 
-        transform.Translate(direction * _speed * Time.deltaTime);
+        _rigidbody.MovePosition(transform.position + direction * _speed * Time.deltaTime);
 
         if(direction != Vector3.zero)
         {
@@ -46,7 +49,7 @@ public class PlayerController : Player
         _animator.SetBool(Keys.Running, false);
 
         // переделать
-        float posy = ResourcesOnHands.Count == 0 ? 0 : ResourcesOnHands.Count * 0.3f;
+        float posy = ResourcesOnHands.Count == 0 ? 0 : ResourcesOnHands.Count * obj.transform.localScale.y;
         obj.transform.position = Hands.transform.position + new Vector3(0, posy, 0);
         obj.transform.SetParent(Hands.transform);
         //

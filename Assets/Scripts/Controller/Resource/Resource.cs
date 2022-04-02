@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Resource : MonoBehaviour
 {
-    public enum ResourceType { Tomato, Potato, Egg }
+    public enum ResourceType { FirTree }
     [SerializeField] private ResourceType _resource;
 
     public ResourceType GetResourceType { get { return _resource; } }
