@@ -12,7 +12,7 @@ public class ResourcesController : Resource
 
     private List<GameObject> _resources = new List<GameObject>();
     private PlayerController _playerController;
-    private bool _onTriggerEnter = false;
+    private bool _isEnter = false;
 
     #region MonoBehaviour
     private void Start()
@@ -22,25 +22,21 @@ public class ResourcesController : Resource
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.TryGetComponent<PlayerController>(out PlayerController playerController))
+        if (other.gameObject.TryGetComponent(out PlayerController playerController))
         {
             _playerController = playerController;
+            _isEnter = true;
 
             if(_resources.Count > 0)
                 StartCoroutine(TakeResource());
-        }
-
-        if(other.gameObject.TryGetComponent<BotController>(out BotController agent))
-        {
-            agent.OnObjectEnter();
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.TryGetComponent<BotController>(out BotController agent))
+        if(other.TryGetComponent(out PlayerController player))
         {
-            agent.OnObjectExit()
+            _isEnter = false;
         }
     }
     #endregion
@@ -48,7 +44,7 @@ public class ResourcesController : Resource
     {
         for(int i = 0; i < _resources.Count;)
         {
-            if (_playerController.AddResourcesOnHands(GetResourceType, _resources[i]))
+            if (_playerController.AddResourcesOnHands(CurrentResource, _resources[i]))
             {
                 Invoke(nameof(InstantiateResources), _delayInstatiateResources);
                 yield break;
@@ -85,6 +81,11 @@ public class ResourcesController : Resource
             Vector3 endScale = resource.transform.localScale;
             resource.transform.localScale *= 0;
             StartCoroutine(ChangeOfScale(resource, endScale, _easing));
+        }
+
+        if (_isEnter)
+        {
+            StartCoroutine(TakeResource());
         }
     }
 }
