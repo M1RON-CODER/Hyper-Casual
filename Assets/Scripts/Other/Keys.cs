@@ -4,12 +4,15 @@ using UnityEngine;
 
 public class Keys
 {
-    // Animation
+    // Animation Keys
     public const string Idle = "Idle";
     public const string Walking = "Walking";
     public const string Running = "Running";
     public const string CarryingIdle = "Carrying Idle";
+    public const string CarryingWalking = "Carrying Walking";
     public const string CarryingRunning = "Carrying Running";
+
+    public const string Opening = "Opening";
 
     // Player Prefs
     public const string Cash = "Cash";

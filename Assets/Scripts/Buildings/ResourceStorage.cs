@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ public class ResourceStorage : Resource
     [SerializeField] private List<Transform> _positions = new List<Transform>();
 
     private List<GameObject> _resources = new List<GameObject>();
-    private int _currentCountResources = 0;
+    private List<BotController> _bots = new List<BotController>();
 
     public new List<GameObject> Resources => _resources;
 
@@ -18,12 +19,15 @@ public class ResourceStorage : Resource
     {
         if(other.TryGetComponent(out PlayerController player))
         {
-            AddResource(player);
+            AddResourceToStorage(player);
         }
 
         if (other.TryGetComponent(out BotController agent))
         {
             agent.OnObjectEnter(this);
+            _bots.Add(agent);
+
+            AllocateResourcesToBots();
         }
     }
 
@@ -32,40 +36,73 @@ public class ResourceStorage : Resource
         if (other.TryGetComponent(out BotController agent))
         {
             agent.OnObjectExit();
+            _bots.Remove(agent);
         }
     }
     #endregion
     
-    protected void AddResource(PlayerController player)
+    protected void AddResourceToStorage(PlayerController player)
     {
-        if (_currentCountResources < _positions.Count && player.ResourcesOnHands.Count > 0)
+        if (_resources.Count == _positions.Count || player.ResourcesOnHands.Count == 0)
         {
-            for (int i = player.ResourcesOnHands.Count - 1; i >= 0; i--)
-            {
-                if (player.ResourcesOnHands[i].Resource == CurrentResource && _currentCountResources < _positions.Count)
-                {
-                    _resources.Add(player.ResourcesOnHands[i].Obj);
-                    player.ResourcesOnHands[i].Obj.transform.DOMove(_positions[_currentCountResources].position, 0.5f);
-                    _currentCountResources++;
-
-                    player.RemoveResourceOnHands(player.ResourcesOnHands[i]);
-                }
-            }
+            return;
         }
+
+        foreach (ResourceParams resource in player.ResourcesOnHands.ToList())
+        {
+            if(_resources.Count >= _positions.Count)
+            {
+                return;
+            }
+
+            if (resource.Resource != CurrentResource)
+            {
+                continue;
+            }
+
+            _resources.Insert(0, resource.Obj);
+            resource.Obj.transform.DOMove(_positions[_resources.Count - 1].position, 0.5f);
+
+            player.RemoveResourceOnHands(resource);
+        }
+            
+        AllocateResourcesToBots();
     }
 
-    public GameObject RemoveResource(GameObject hands)
+    public GameObject RemoveResource()
     {
         if (_resources.Count > 0)
         {
             GameObject resource = _resources.Last();
-            resource.transform.DOMove(hands.transform.position, 0.5f);
             _resources.Remove(_resources.Last());
-            _currentCountResources--;
 
             return resource;
         }
         
         return null;
+    }
+
+    private void AllocateResourcesToBots()
+    {
+        if (_bots.Count == 0 || _resources.Count == 0)
+        {
+            return;
+        }
+
+        foreach (BotController bot in _bots.ToList())
+        {
+            foreach(GameObject resource in _resources.ToList())
+            {
+                _resources.Remove(_resources.First());
+
+                if (_bots.First().AddResourceOnHands(resource))
+                { 
+                    StartCoroutine(bot.NextTarget());
+                    _bots.Remove(bot);
+                    
+                    return;
+                }
+            }
+        }
     }
 }

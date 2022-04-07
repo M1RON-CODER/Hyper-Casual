@@ -4,7 +4,6 @@ using UnityEngine;
 
 public abstract class Player : MonoBehaviour
 {
-    [SerializeField] private Canvases _canvases;
     [SerializeField] private CashData _cashData;
     [SerializeField] private GameObject _playerObj;
     [SerializeField] private GameObject _hands;
