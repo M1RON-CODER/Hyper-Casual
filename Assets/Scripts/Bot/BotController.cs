@@ -38,7 +38,8 @@ public class BotController : MonoBehaviour
     public bool IsStopped { get; set; }
 
     [SerializeField] private GameObject _hands;
-    [SerializeField] private TMP_Text _demand;
+    [SerializeField] private BotBar _botBar;
+    // [SerializeField] private TMP_Text _demand;
 
     private List<TargetParams> _targets = new List<TargetParams>();
     private List<CashRegister> _cashRegisters = new List<CashRegister>();
@@ -58,14 +59,14 @@ public class BotController : MonoBehaviour
         _agent = GetComponent<NavMeshAgent>();
         _animator = GetComponent<Animator>();
 
-        StartCoroutine(CheckStateStop());
+        //StartCoroutine(CheckStateStop());
 
         SetAnimation(Keys.Idle, true);
     }
 
     private void Update()
     {
-        _demand.transform.LookAt(Camera.main.transform);
+        // _demand.transform.LookAt(Camera.main.transform);
     }
     #endregion
 
@@ -114,6 +115,8 @@ public class BotController : MonoBehaviour
         _targets.First().AddOneResource();
         UpdateCountResourcesOverhead();
 
+        _botBar.UpdateData(_targets.First().CurrentCountResources, _targets.First().TotalCountResources);
+
         return _targets.First().CurrentCountResources >= _targets.First().TotalCountResources;
     }
 
@@ -143,14 +146,18 @@ public class BotController : MonoBehaviour
 
     private void MoveWaypoint()
     {
-        _agent.destination = _targets.First().Waypoint;
-        UpdateCountResourcesOverhead();
+        TargetParams target = _targets.First();
+        _agent.destination = target.Waypoint;
+
+        _botBar.SetData(target.Resource, target.CurrentCountResources, target.TotalCountResources);
+
+        // UpdateCountResourcesOverhead();
     }
 
     private void UpdateCountResourcesOverhead()
     {
         TargetParams target = _targets.First();
-        _demand.text = $"{target.CurrentCountResources} / {target.TotalCountResources}";
+        // _demand.text = $"{target.CurrentCountResources} / {target.TotalCountResources}";
     }
     
     private void MoveCashRegister()
@@ -164,25 +171,30 @@ public class BotController : MonoBehaviour
 
         var cashReg = distance.Where(x => x.Value == distance.Values.Min()).FirstOrDefault().Key;
 
-        _agent.destination = cashReg.GetPosition().position;
+        Transform botPosition = cashReg.GetPosition();
+        _agent.destination = botPosition.position;
+        int indexPosition = cashReg.GetIndexBotPosition(botPosition);
         
+        StartCoroutine(CheckStateStop(cashReg, indexPosition));
+
         StateMove();
     }
 
-    private void AddResourceOverhead()
+/*    private void AddResourceOverhead()
     {
-        GameObject resourceSprite = Instantiate(_sprites.GetSprite(_targets.First().Resource), transform.GetChild(0)) as GameObject;
+        GameObject resourceSprite = Instantiate(_sprites.SetSprite(_targets.First().Resource), transform.GetChild(0)) as GameObject;
         resourceSprite.transform.localPosition = new Vector3(0, 2.5f, 0);
         resourceSprite.transform.localEulerAngles = new Vector3(0, 0, 0);
-    }
+    }*/
 
-    private IEnumerator CheckStateStop()
+    private IEnumerator CheckStateStop(CashRegister cashRegister, int indexPosition)
     {
         while (true)
         {
             yield return new WaitForSeconds(0.3f);
             if (_agent.remainingDistance <= 0.1f)
             {
+                cashRegister.PositionForBots[indexPosition].ComeToWaypoint(true);
                 StateStop();
             }
         }

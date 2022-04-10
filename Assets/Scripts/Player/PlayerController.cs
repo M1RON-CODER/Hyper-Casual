@@ -12,6 +12,7 @@ public class PlayerController : Player
 
     private Animator _animator;
     private Rigidbody _rigidbody;
+    
     private string _currentAnimation = Keys.Running;
 
     public string CurrentAnimation => _currentAnimation;

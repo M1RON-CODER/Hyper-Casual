@@ -8,14 +8,34 @@ public class Sprites : MonoBehaviour
 
     public GameObject FirTree => _firTree;
 
-    public GameObject GetSprite(Resource.Resources resource)
+    private GameObject _currentSprite;
+
+    public void SetSprite(Resource.Resources resource)
     {
+        if(_currentSprite != null)
+        {
+            Hide();
+        }
+
         switch(resource)
         {
             case Resource.Resources.FirTree:
-                return _firTree;
+                _currentSprite = _firTree;
+                break;
             default:
-                return null;
+                break;
         }
+
+        Show();
+    }
+
+    private void Show()
+    {
+        _currentSprite.gameObject.SetActive(true);
+    }
+
+    private void Hide()
+    {
+        _currentSprite.gameObject.SetActive(false);
     }
 }

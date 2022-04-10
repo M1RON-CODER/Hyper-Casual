@@ -12,7 +12,7 @@ public class ResourcesController : Resource
 
     private List<GameObject> _resources = new List<GameObject>();
     private PlayerController _playerController;
-    private bool _isEnter = false;
+    private bool _isPlayerEnter;
 
     #region MonoBehaviour
     private void Start()
@@ -25,7 +25,7 @@ public class ResourcesController : Resource
         if (other.gameObject.TryGetComponent(out PlayerController playerController))
         {
             _playerController = playerController;
-            _isEnter = true;
+            _isPlayerEnter = true;
 
             if(_resources.Count > 0)
                 TakeResource();
@@ -36,7 +36,7 @@ public class ResourcesController : Resource
     {
         if(other.TryGetComponent(out PlayerController player))
         {
-            _isEnter = false;
+            _isPlayerEnter = false;
         }
     }
     #endregion
@@ -100,7 +100,7 @@ public class ResourcesController : Resource
             StartCoroutine(ChangeOfScale(resource, endScale, _easing));
         }
 
-        if (_isEnter)
+        if (_isPlayerEnter)
         {
             Invoke(nameof(TakeResource), 0.1f);
         }
