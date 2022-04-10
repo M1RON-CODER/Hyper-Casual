@@ -62,7 +62,7 @@ public class ResourceStorage : Resource
 
             if (_bots.Count > 0)
             {
-                AllocateResourcesToBots(player);
+                PassResourcesToBots(player);
                 AddResourceToStorage(player);
                 return;
             }
@@ -71,7 +71,7 @@ public class ResourceStorage : Resource
             
             if(_bots.Count == 0)
             {
-                resource.Obj.transform.DOMove(_positions[_resources.Count - 1].position, 0.5f);
+                resource.Obj.transform.DOMove(_positions[_resources.Count - 1].position, 0.3f);
             }
 
             player.RemoveResourceOnHands(resource);
@@ -112,7 +112,7 @@ public class ResourceStorage : Resource
         }   
     }
 
-    private void AllocateResourcesToBots(PlayerController player)
+    private void PassResourcesToBots(PlayerController player)
     {      
         foreach (BotController bot in _bots.ToList())
         {

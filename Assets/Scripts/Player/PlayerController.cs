@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -54,8 +55,8 @@ public class PlayerController : Player
         _currentAnimation = Keys.CarryingRunning;
         
         Vector3 position = GetPositionForResourceInHands();
-        obj.transform.position = Hands.transform.position + position;
         obj.transform.SetParent(Hands.transform);
+        obj.transform.DOLocalMove(position, 0.2f);
 
         ResourcesOnHands.Insert(0, (new Resource.ResourceParams { Obj = obj, Resource = resource }));
 

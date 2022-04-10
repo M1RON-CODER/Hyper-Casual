@@ -29,7 +29,7 @@ public class BotController : MonoBehaviour
         public int TotalCountResources => _totalCountResources;
         public int CurrentCountResources => _currentCoutResources;
 
-        public void AddCurrentCountResource()
+        public void AddOneResource()
         {
             _currentCoutResources++;
         }
@@ -43,9 +43,11 @@ public class BotController : MonoBehaviour
     private List<TargetParams> _targets = new List<TargetParams>();
     private List<CashRegister> _cashRegisters = new List<CashRegister>();
     private List<GameObject> _resourcesOnHands = new List<GameObject>();
+
     private NavMeshAgent _agent;
     private Animator _animator;
     private Sprites _sprites;
+    
     private string _currentAnimation = Keys.Idle;
 
     public GameObject Hands => _hands;
@@ -64,9 +66,6 @@ public class BotController : MonoBehaviour
     private void Update()
     {
         _demand.transform.LookAt(Camera.main.transform);
-
-/*        Debug.Log("hands posiitons: " + (_hands.transform.position + new Vector3(0, 0, 0)));
-        Time.timeScale = 0;*/
     }
     #endregion
 
@@ -112,7 +111,7 @@ public class BotController : MonoBehaviour
         
         _resourcesOnHands.Add(resource);
 
-        _targets.First().AddCurrentCountResource();
+        _targets.First().AddOneResource();
         UpdateCountResourcesOverhead();
 
         return _targets.First().CurrentCountResources >= _targets.First().TotalCountResources;
@@ -125,7 +124,7 @@ public class BotController : MonoBehaviour
    
     public IEnumerator NextTarget()
     {
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(0.2f);
 
         _currentAnimation = Keys.CarryingWalking;
         SetAnimation(Keys.CarryingWalking, true);

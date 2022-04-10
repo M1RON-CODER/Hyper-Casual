@@ -28,7 +28,7 @@ public class ResourcesController : Resource
             _isEnter = true;
 
             if(_resources.Count > 0)
-                StartCoroutine(TakeResource());
+                TakeResource();
         }
     }
 
@@ -40,19 +40,35 @@ public class ResourcesController : Resource
         }
     }
     #endregion
-    private IEnumerator TakeResource()
-    {
-        for(int i = 0; i < _resources.Count;)
+    /*    private IEnumerator TakeResource()
         {
-            if (_playerController.AddResourcesOnHands(CurrentResource, _resources[i]))
+            for(int i = 0; i < _resources.Count;)
             {
-                Invoke(nameof(InstantiateResources), _delayInstatiateResources);
-                yield break;
+                if (_playerController.AddResourcesOnHands(CurrentResource, _resources[i]))
+                {
+                    Invoke(nameof(InstantiateResources), _delayInstatiateResources);
+                    yield break;
+                }
+
+                _resources.RemoveAt(i);
+
+                yield return new WaitForSeconds(0.05f);
             }
 
-            _resources.RemoveAt(i);
-         
-            yield return new WaitForSeconds(0.05f);
+            Invoke(nameof(InstantiateResources), _delayInstatiateResources);
+        }*/
+
+    private void TakeResource()
+    {
+        foreach (GameObject resource in _resources.ToList())
+        {
+            if (_playerController.AddResourcesOnHands(CurrentResource, resource))
+            {
+                Invoke(nameof(InstantiateResources), _delayInstatiateResources);
+                return;
+            }
+
+            _resources.Remove(resource);
         }
 
         Invoke(nameof(InstantiateResources), _delayInstatiateResources);
@@ -86,7 +102,7 @@ public class ResourcesController : Resource
 
         if (_isEnter)
         {
-            StartCoroutine(TakeResource());
+            Invoke(nameof(TakeResource), 0.1f);
         }
     }
 }
