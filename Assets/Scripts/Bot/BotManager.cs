@@ -8,7 +8,7 @@ public class BotManager : MonoBehaviour
     [SerializeField] private Sprites _sprites;
     [SerializeField] private List<Transform> _spawnPoints = new List<Transform>();
     [SerializeField] private List<GameObject> _waypoints = new List<GameObject>();
-    [SerializeField] private List<GameObject> _cashRegisters = new List<GameObject>();
+    [SerializeField] private List<CashRegister> _cashRegisters = new List<CashRegister>();
     [Min(1)] [SerializeField] private int _maxCountBotOnOneWaypoint;
 
     private List<GameObject> _bots = new List<GameObject>();

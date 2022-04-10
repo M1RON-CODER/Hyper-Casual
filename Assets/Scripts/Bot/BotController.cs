@@ -41,29 +41,36 @@ public class BotController : MonoBehaviour
     [SerializeField] private TMP_Text _demand;
 
     private List<TargetParams> _targets = new List<TargetParams>();
-    private List<GameObject> _cashRegisters = new List<GameObject>();
+    private List<CashRegister> _cashRegisters = new List<CashRegister>();
     private List<GameObject> _resourcesOnHands = new List<GameObject>();
     private NavMeshAgent _agent;
     private Animator _animator;
     private Sprites _sprites;
     private string _currentAnimation = Keys.Idle;
 
+    public GameObject Hands => _hands;
+
     #region MonoBehaviour
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
         _animator = GetComponent<Animator>();
-        
+
+        StartCoroutine(CheckStateStop());
+
         SetAnimation(Keys.Idle, true);
     }
 
     private void Update()
     {
         _demand.transform.LookAt(Camera.main.transform);
+
+/*        Debug.Log("hands posiitons: " + (_hands.transform.position + new Vector3(0, 0, 0)));
+        Time.timeScale = 0;*/
     }
     #endregion
 
-    public void Initialize(List<GameObject> cashRegisters, Sprites sprites)
+    public void Initialize(List<CashRegister> cashRegisters, Sprites sprites)
     {
         _cashRegisters = cashRegisters;
         _sprites = sprites;
@@ -76,7 +83,7 @@ public class BotController : MonoBehaviour
         {
             int index = Random.Range(0, buildings.Count);
             
-            _targets.Add(new TargetParams(buildings[index].gameObject.transform.position, buildings[index].GetComponent<Resource>().CurrentResource, Random.Range(1, 4)));
+            _targets.Add(new TargetParams(buildings[index].gameObject.transform.position, buildings[index].GetComponent<Resource>().CurrentResource, Random.Range(1, 2)));
             buildings.RemoveAt(index);
         }
 
@@ -94,21 +101,21 @@ public class BotController : MonoBehaviour
         SetAnimation(_currentAnimation, true);
     }
 
-    public bool AddResourceOnHands(GameObject resource)
+    public bool AddResourceInHands(GameObject resource)
     {
         SetAnimation(Keys.CarryingIdle, true);
 
         float positionY = _resourcesOnHands.Count == 0 ? 0 : _resourcesOnHands.Count * resource.transform.localScale.y;
 
-        resource.transform.DOMove(_hands.transform.position + new Vector3(0, positionY, 0), 0.1f);
         resource.transform.SetParent(_hands.transform);
-
+        resource.transform.DOLocalMove(new Vector3(0, positionY, 0), 0.2f);
+        
         _resourcesOnHands.Add(resource);
 
         _targets.First().AddCurrentCountResource();
         UpdateCountResourcesOverhead();
 
-        return _targets.First().CurrentCountResources == _targets.First().TotalCountResources;
+        return _targets.First().CurrentCountResources >= _targets.First().TotalCountResources;
     }
 
     public void RemoveOnHands(GameObject resource)
@@ -118,7 +125,7 @@ public class BotController : MonoBehaviour
    
     public IEnumerator NextTarget()
     {
-        yield return new WaitForSeconds(0.4f);
+        yield return new WaitForSeconds(4f);
 
         _currentAnimation = Keys.CarryingWalking;
         SetAnimation(Keys.CarryingWalking, true);
@@ -149,17 +156,18 @@ public class BotController : MonoBehaviour
     
     private void MoveCashRegister()
     {
-        /*        Dictionary<GameObject, float> distance = new Dictionary<GameObject, float>();
-                foreach (GameObject cashRegister in _cashRegisters)
-                {
-                    distance.Add(cashRegister, Vector3.Distance(cashRegister.transform.position, transform.position));
-                }
+        Dictionary<CashRegister, float> distance = new Dictionary<CashRegister, float>();
+        
+        foreach (CashRegister cashRegister in _cashRegisters)
+        {
+            distance.Add(cashRegister, Vector3.Distance(cashRegister.transform.position, transform.position));
+        }
 
-                var cashReg = distance.Where(x => x.Value == distance.Values.Min()).FirstOrDefault().Key;
+        var cashReg = distance.Where(x => x.Value == distance.Values.Min()).FirstOrDefault().Key;
 
-                _agent.destination = cashReg.transform.position;*/
+        _agent.destination = cashReg.GetPosition().position;
+        
         StateMove();
-        _agent.destination = _cashRegisters.First().transform.position;
     }
 
     private void AddResourceOverhead()
@@ -168,13 +176,34 @@ public class BotController : MonoBehaviour
         resourceSprite.transform.localPosition = new Vector3(0, 2.5f, 0);
         resourceSprite.transform.localEulerAngles = new Vector3(0, 0, 0);
     }
-    
+
+    private IEnumerator CheckStateStop()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(0.3f);
+            if (_agent.remainingDistance <= 0.1f)
+            {
+                StateStop();
+            }
+        }
+    }
+
+    private void StateMove()
+    {
+        _agent.isStopped = false;
+
+        _animator.SetBool(_currentAnimation, true);
+    }
+    private void StateStop()
+    {
+        _agent.isStopped = true;
+
+        _animator.SetBool(_currentAnimation, false);        
+    }
+
     private void SetAnimation(string key, bool value)
     {
         _animator.SetBool(key, value);
     }
-
-
-    private void StateMove() => _agent.isStopped = false;
-    private void StateStop() => _agent.isStopped = true;
 }

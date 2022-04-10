@@ -52,12 +52,10 @@ public class PlayerController : Player
         _animator.SetBool(Keys.CarryingIdle, true);
 
         _currentAnimation = Keys.CarryingRunning;
-
-        // переделать
-        float posY = ResourcesOnHands.Count == 0 ? 0 : ResourcesOnHands.Count * obj.transform.localScale.y;
-        obj.transform.position = Hands.transform.position + new Vector3(0, posY, 0);
+        
+        Vector3 position = GetPositionForResourceInHands();
+        obj.transform.position = Hands.transform.position + position;
         obj.transform.SetParent(Hands.transform);
-        //
 
         ResourcesOnHands.Insert(0, (new Resource.ResourceParams { Obj = obj, Resource = resource }));
 
@@ -76,10 +74,10 @@ public class PlayerController : Player
 
         if(ResourcesOnHands.Count == 0)
         {
-            _animator.SetBool(Keys.CarryingIdle, false);
-            _animator.SetBool(Keys.CarryingRunning, false);
             _animator.SetBool(Keys.Idle, true);
             _animator.SetBool(Keys.Running, true);
+            _animator.SetBool(Keys.CarryingIdle, false);
+            _animator.SetBool(Keys.CarryingRunning, false);
             _currentAnimation = Keys.Running;
         }
     }
@@ -109,5 +107,22 @@ public class PlayerController : Player
     public void DestroyResourcesOnHands()
     {
         ResourcesOnHands.Clear();
+    }
+
+    private Vector3 GetPositionForResourceInHands()
+    {
+        if (ResourcesOnHands.Count == 0)
+        {
+            return Vector3.zero;
+        }
+
+        Vector3 position = Vector3.zero;
+        
+        foreach (Resource.ResourceParams resource in ResourcesOnHands)
+        {
+            position.y += resource.Obj.transform.localScale.x;
+        }
+
+        return position;    
     }
 }

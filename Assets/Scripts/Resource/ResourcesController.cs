@@ -76,6 +76,7 @@ public class ResourcesController : Resource
         for (int i = 0; i < count; i++)
         {
             GameObject resource = Instantiate(_objResource, _positionResources[i]);
+            resource.name = i.ToString();
             _resources.Insert(i, resource);
 
             Vector3 endScale = resource.transform.localScale;
