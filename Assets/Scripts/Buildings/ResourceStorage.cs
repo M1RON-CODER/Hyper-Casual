@@ -19,7 +19,6 @@ public class ResourceStorage : Resource
     {
         if (other.TryGetComponent(out BotController bot))
         {
-            Debug.Log("Bot entered storage");
             bot.OnObjectEnter(this);
             _bots.Add(bot);
 
@@ -28,7 +27,6 @@ public class ResourceStorage : Resource
         
         if (other.TryGetComponent(out PlayerController player))
         {
-            Debug.Log("Player entered storage");
             AddResourceToStorage(player);        
         }
     }
