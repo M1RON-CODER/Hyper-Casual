@@ -68,8 +68,11 @@ public class ResourceStorage : Resource
             }
             
             _resources.Insert(0, resource.Obj);
+            
             if(_bots.Count == 0)
+            {
                 resource.Obj.transform.DOMove(_positions[_resources.Count - 1].position, 0.5f);
+            }
 
             player.RemoveResourceOnHands(resource);
         }
