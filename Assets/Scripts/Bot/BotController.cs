@@ -43,7 +43,7 @@ public class BotController : MonoBehaviour
 
     private List<TargetParams> _targets = new List<TargetParams>();
     private List<CashRegister> _cashRegisters = new List<CashRegister>();
-    private List<GameObject> _resourcesOnHands = new List<GameObject>();
+    private List<GameObject> _resourcesInHands = new List<GameObject>();
 
     private NavMeshAgent _agent;
     private Animator _animator;
@@ -52,6 +52,7 @@ public class BotController : MonoBehaviour
     private string _currentAnimation = Keys.Idle;
 
     public GameObject Hands => _hands;
+    public List<GameObject> ResourcesInHands => _resourcesInHands;
 
     #region MonoBehaviour
     private void Awake()
@@ -59,14 +60,7 @@ public class BotController : MonoBehaviour
         _agent = GetComponent<NavMeshAgent>();
         _animator = GetComponent<Animator>();
 
-        //StartCoroutine(CheckStateStop());
-
         SetAnimation(Keys.Idle, true);
-    }
-
-    private void Update()
-    {
-        // _demand.transform.LookAt(Camera.main.transform);
     }
     #endregion
 
@@ -105,12 +99,12 @@ public class BotController : MonoBehaviour
     {
         SetAnimation(Keys.CarryingIdle, true);
 
-        float positionY = _resourcesOnHands.Count == 0 ? 0 : _resourcesOnHands.Count * resource.transform.localScale.y;
+        float positionY = _resourcesInHands.Count == 0 ? 0 : _resourcesInHands.Count * resource.transform.localScale.y;
 
         resource.transform.SetParent(_hands.transform);
         resource.transform.DOLocalMove(new Vector3(0, positionY, 0), 0.2f);
         
-        _resourcesOnHands.Add(resource);
+        _resourcesInHands.Add(resource);
 
         _targets.First().AddOneResource();
         UpdateCountResourcesOverhead();
@@ -122,7 +116,7 @@ public class BotController : MonoBehaviour
 
     public void RemoveOnHands(GameObject resource)
     {
-        _resourcesOnHands.Remove(resource);
+        _resourcesInHands.Remove(resource);
     }
    
     public IEnumerator NextTarget()
@@ -194,7 +188,7 @@ public class BotController : MonoBehaviour
             yield return new WaitForSeconds(0.3f);
             if (_agent.remainingDistance <= 0.1f)
             {
-                cashRegister.PositionForBots[indexPosition].ComeToWaypoint(true);
+                cashRegister.PositionForBots[indexPosition].ComeToWaypoint(cashRegister, this);
                 StateStop();
             }
         }

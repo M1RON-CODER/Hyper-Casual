@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,30 +9,34 @@ using UnityEngine;
 public class CashRegister : MonoBehaviour
 {
     [Serializable]
-    public class PositionParams
+    public class BotParams
     {
         public Transform position;
-        private bool _isFreeSpace;
-        private bool _inPlace;
+        private BotController _bot;
+        private bool _isBusyPlace;
 
-        public bool IsFreeSpace => _isFreeSpace;
+        public BotController Bot => _bot;
+        public bool IsBusyPlace => _isBusyPlace;
 
-        public void SetFreeSpace(bool isFreeSpace)
+        public void SetBusyPlace(bool isFreeSpace)
         {
-            _isFreeSpace = isFreeSpace;
+            _isBusyPlace = isFreeSpace;
         }
 
-        public void ComeToWaypoint(bool inPlace)
+        public void ComeToWaypoint(CashRegister cashRegister, BotController bot)
         {
-            _inPlace = inPlace;
+            cashRegister.ServeBot();
+            _bot = bot;
         }
     }
 
-    [SerializeField] private List<PositionParams> _positionsForBots = new List<PositionParams>();
+    [SerializeField] private GameObject _boxPrefab;
+    [SerializeField] private Transform _boxPosition;
+    [SerializeField] private List<BotParams> _positionsForBots = new List<BotParams>();
 
     private bool _isHaveEmployee;
 
-    public List<PositionParams> PositionForBots => _positionsForBots;
+    public List<BotParams> PositionForBots => _positionsForBots;
 
     #region MonoBehaviour
     private void Awake()
@@ -56,13 +61,21 @@ public class CashRegister : MonoBehaviour
     }
     #endregion
 
+    public void ServeBot()
+    {
+        return;
+        BotParams bot = _positionsForBots.First();
+
+        MoveResourcesInBox(bot.Bot.ResourcesInHands);
+    }
+
     public Transform GetPosition()
     {
         foreach (var position in _positionsForBots)
         {
-            if (!position.IsFreeSpace)
+            if (!position.IsBusyPlace)
             {
-                position.SetFreeSpace(true);
+                position.SetBusyPlace(true);
                 return position.position;
             }
         }
@@ -81,5 +94,57 @@ public class CashRegister : MonoBehaviour
         }
         
         return -1;
+    }
+
+    private void MoveResourcesInBox(List<GameObject> resources)
+    {
+        Box box = InstantiateBox();
+
+        int index = 0;
+        foreach (GameObject resource in resources.ToList())
+        {
+            if(index > box.Positions.Count - 1)
+            {
+                index = 0;
+            }
+
+            resource.transform.SetParent(box.transform);
+            resource.transform.DOLocalMove(box.GetComponent<Box>().Positions[index].position, 0.1f);
+
+            index++;
+        }
+
+        Invoke(nameof(NextBuyer), resources.Count * 0.1f);
+    }
+
+    private Box InstantiateBox()
+    {
+        return Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity).GetComponent<Box>();
+    }
+
+    private void NextBuyer()
+    {
+        _positionsForBots.First().SetBusyPlace(false);
+
+        if (GetBusyPlace())
+        {
+            for (int i = 0; i < _positionsForBots.Count; i++)
+            {
+
+            }
+        }
+    }
+
+    private bool GetBusyPlace()
+    {
+        foreach(BotParams bot in _positionsForBots.ToList())
+        {
+            if (bot.IsBusyPlace)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
