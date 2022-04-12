@@ -102,7 +102,7 @@ public class ResourceStorage : Resource
         {
             _resources.Remove(_resources.First());
 
-            if (bot.AddResourceInHands(resource))
+            if (bot.AddResourceToHands(resource))
             { 
                 StartCoroutine(bot.NextTarget());
                 _bots.Remove(bot);
@@ -125,7 +125,7 @@ public class ResourceStorage : Resource
                 
                 player.ResourcesOnHands.Remove(resource);
 
-                if (bot.AddResourceInHands(resource.Obj))
+                if (bot.AddResourceToHands(resource.Obj))
                 {
                     StartCoroutine(bot.NextTarget());
                     _bots.Remove(bot);
