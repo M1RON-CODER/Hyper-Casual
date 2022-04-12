@@ -115,6 +115,12 @@ public class BotController : MonoBehaviour
         return _targets.First().CurrentCountResources >= _targets.First().TotalCountResources;
     }
 
+    public void RemoveResourceInHands(GameObject resource)
+    {
+        resource.transform.SetParent(null);
+        _resourcesInHands.Remove(resource);
+    }
+
     public void MovePosition(Transform point)
     {
         _agent.destination = point.position;
@@ -187,12 +193,12 @@ public class BotController : MonoBehaviour
 
         var cashReg = distance.Where(x => x.Value == distance.Values.Min()).FirstOrDefault().Key;
 
-        Transform botPosition = cashReg.GetPosition();
-        Debug.Log("Bot position: " + botPosition);
-        _agent.destination = botPosition.position;
-        int indexPosition = cashReg.GetIndexBotPosition(botPosition);
+        //Transform botPosition = cashReg.GetPosition();
+        //Debug.Log("Bot position: " + botPosition);
+        //_agent.destination = botPosition.position;
+        //int indexPosition = cashReg.GetIndexBotPosition(botPosition);
         
-        StartCoroutine(CheckDistanceStop(cashReg, indexPosition));
+        //StartCoroutine(CheckDistanceStop(cashReg, indexPosition));
 
         StateMove();
     }
@@ -218,7 +224,7 @@ public class BotController : MonoBehaviour
             yield return new WaitForSeconds(0.3f);
             if (_agent.remainingDistance <= 0.1f)
             {
-                cashRegister.PositionForBots[indexPosition].ComeToWaypoint(cashRegister, this);
+                //cashRegister.PositionForBots[indexPosition].ComeToWaypoint(cashRegister, this);
                 StateStop();
 
                 yield break;

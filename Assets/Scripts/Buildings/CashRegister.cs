@@ -3,12 +3,129 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class CashRegister : MonoBehaviour
 {
-    [Serializable]
+    public class Queue
+    {
+        private Transform _position;
+        private BotController _bot;
+        private bool _isBusyPlace;
+
+        public Queue(Transform position)
+        {
+            _position = position;
+            _bot = null;
+            _isBusyPlace = false;
+        }
+
+        public Transform Position => _position;
+        public BotController Bot => _bot;
+        public bool IsBusyPlace => _isBusyPlace;
+
+        public void SetBusyPlace(BotController bot)
+        {
+            _bot = bot;
+            _isBusyPlace = true;
+        }
+    }
+
+    [SerializeField] private Box _boxPrefab;
+    [SerializeField] private Transform _boxPosition;
+    [SerializeField] private List<Transform> _positions = new List<Transform>();
+
+    private List<Queue> _queues = new List<Queue>();
+    private bool _isHaveEmployee;
+
+    public List<Queue> Queues => _queues;
+
+    #region MonoBehaviour
+    private void Awake()
+    {
+        Initialize();
+
+        Debug.Log(UnoccupiedPlace());
+    }
+    #endregion
+
+    public void Serve()
+    {
+        Queue queue = _queues.First();
+
+        Box box = InstantiateBox();
+        MoveResourcesToBox(queue, box);
+    }
+
+    public int UnoccupiedPlace()
+    {
+        return _queues.FindIndex(q => !q.IsBusyPlace);
+    }
+
+    private void MoveResourcesToBox(Queue queue, Box box)
+    {
+        int index = 0;
+        float duration = 0.3f;
+        foreach (GameObject resource in queue.Bot.ResourcesInHands.ToList())
+        {
+            if (index >= queue.Bot.ResourcesInHands.Count - 1)
+            {
+                index = 0;
+            }
+
+            queue.Bot.ResourcesInHands.Remove(resource);
+            resource.transform.SetParent(box.transform);
+            resource.transform.DOLocalJump(box.Positions[index].position, 250, 1, duration);
+            
+            index++;
+        }
+        
+        MoveBoxToHands(box, queue.Bot.Hands.transform, queue.Bot.MoveTowardsExit);
+        NextBuyer();   
+    }
+
+    private void NextBuyer()
+    {
+        for (int i = 0; i < _queues.Count; i++)
+        {
+            if(i == _queues.Count - 1)
+            {
+                _queues[i] = new Queue(_queues[i].Position);
+            }
+
+            _queues[i].SetBusyPlace(_queues[i + 1].Bot);
+        }
+
+        if(_queues.First().Bot != null)
+        {
+            Serve();
+        }
+    }
+
+    private void MoveBoxToHands(Box box, Transform hands, Action moveTowardsExit)
+    {
+        float duration = 0.3f;
+        box.transform.DORotate(new Vector3(0, 90, 0), duration);
+        box.transform.SetParent(hands);
+        box.transform.DOMove(Vector3.zero, duration).OnComplete(moveTowardsExit.Invoke);
+    }
+
+    private Box InstantiateBox()
+    {
+        return Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity);
+    }
+
+    private void Initialize()
+    {
+        for (int i = 0; i < _positions.Count; i++)
+        {
+            _queues.Add(new Queue(_positions[i]));
+        }
+    }
+}
+
+
+/*    [Serializable]
     public class BotParams
     {
         public Transform position;
@@ -169,5 +286,4 @@ public class CashRegister : MonoBehaviour
     private bool CheckFirstBot(BotParams bot)
     {
         return _botParams.FindIndex(x => x == bot) == 0;
-    }
-}
+    }*/
