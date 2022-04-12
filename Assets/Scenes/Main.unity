@@ -1528,6 +1528,37 @@ Transform:
   m_Father: {fileID: 558032480}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &444549318
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 444549319}
+  m_Layer: 0
+  m_Name: Position For Box
+  m_TagString: Untagged
+  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &444549319
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 444549318}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.454, y: 1.195, z: -0.094}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 789557706}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &446133572
 GameObject:
   m_ObjectHideFlags: 0
@@ -2147,6 +2178,7 @@ Transform:
   - {fileID: 183834750}
   - {fileID: 1716115481}
   - {fileID: 1019435125}
+  - {fileID: 444549319}
   m_Father: {fileID: 543450652031991041}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2564,7 +2596,7 @@ GameObject:
   m_Layer: 0
   m_Name: Point 1
   m_TagString: Untagged
-  m_Icon: {fileID: 419385456094870383, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -4699,7 +4731,7 @@ GameObject:
   m_Layer: 0
   m_Name: Point 2
   m_TagString: Untagged
-  m_Icon: {fileID: 419385456094870383, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -8086,8 +8118,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfb489f88d5e44640982ea5ac1f7023a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _boxPrefab: {fileID: 0}
-  _boxPosition: {fileID: 0}
+  _boxPrefab: {fileID: 5992099844424541987, guid: b6394a2803c430b43bb260e60a176b8f,
+    type: 3}
+  _boxPosition: {fileID: 8100476870125695755, guid: b6394a2803c430b43bb260e60a176b8f,
+    type: 3}
   _positionsForBots:
   - position: {fileID: 120463405}
   - position: {fileID: 562613394}

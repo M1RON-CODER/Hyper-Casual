@@ -39,7 +39,6 @@ public class BotController : MonoBehaviour
 
     [SerializeField] private GameObject _hands;
     [SerializeField] private BotBar _botBar;
-    // [SerializeField] private TMP_Text _demand;
 
     private List<TargetParams> _targets = new List<TargetParams>();
     private List<CashRegister> _cashRegisters = new List<CashRegister>();
@@ -48,11 +47,13 @@ public class BotController : MonoBehaviour
     private NavMeshAgent _agent;
     private Animator _animator;
     private Sprites _sprites;
+    private Transform _exit; 
     
     private string _currentAnimation = Keys.Idle;
 
     public GameObject Hands => _hands;
     public List<GameObject> ResourcesInHands => _resourcesInHands;
+    public NavMeshAgent Agent => _agent;
 
     #region MonoBehaviour
     private void Awake()
@@ -64,10 +65,11 @@ public class BotController : MonoBehaviour
     }
     #endregion
 
-    public void Initialize(List<CashRegister> cashRegisters, Sprites sprites)
+    public void Initialize(List<CashRegister> cashRegisters, Sprites sprites, Transform exit)
     {
         _cashRegisters = cashRegisters;
         _sprites = sprites;
+        _exit = exit;
     }
 
     public void SetWaypoints(List<GameObject> waypoints)
@@ -107,16 +109,16 @@ public class BotController : MonoBehaviour
         _resourcesInHands.Add(resource);
 
         _targets.First().AddOneResource();
-        UpdateCountResourcesOverhead();
 
         _botBar.UpdateData(_targets.First().CurrentCountResources, _targets.First().TotalCountResources);
 
         return _targets.First().CurrentCountResources >= _targets.First().TotalCountResources;
     }
 
-    public void RemoveOnHands(GameObject resource)
+    public void MovePosition(Transform point)
     {
-        _resourcesInHands.Remove(resource);
+        _agent.destination = point.position;
+        StartCoroutine(CheckDistanceStop());
     }
    
     public IEnumerator NextTarget()
@@ -136,6 +138,26 @@ public class BotController : MonoBehaviour
         {
             MoveWaypoint();
         }
+    }
+
+    public void MoveTowardsExit()
+    {
+        _agent.destination = _exit.position;
+    }
+
+    public void SetAnimation(string key, bool value)
+    {
+        _animator.SetBool(key, value);
+    }
+
+    private void Move()
+    {
+        
+    }
+
+    private void Stop()
+    {
+        
     }
 
     private void MoveWaypoint()
@@ -166,22 +188,30 @@ public class BotController : MonoBehaviour
         var cashReg = distance.Where(x => x.Value == distance.Values.Min()).FirstOrDefault().Key;
 
         Transform botPosition = cashReg.GetPosition();
+        Debug.Log("Bot position: " + botPosition);
         _agent.destination = botPosition.position;
         int indexPosition = cashReg.GetIndexBotPosition(botPosition);
         
-        StartCoroutine(CheckStateStop(cashReg, indexPosition));
+        StartCoroutine(CheckDistanceStop(cashReg, indexPosition));
 
         StateMove();
     }
 
-/*    private void AddResourceOverhead()
+    private IEnumerator CheckDistanceStop()
     {
-        GameObject resourceSprite = Instantiate(_sprites.SetSprite(_targets.First().Resource), transform.GetChild(0)) as GameObject;
-        resourceSprite.transform.localPosition = new Vector3(0, 2.5f, 0);
-        resourceSprite.transform.localEulerAngles = new Vector3(0, 0, 0);
-    }*/
+        while (true)
+        {
+            yield return new WaitForSeconds(0.3f);
+            if (_agent.remainingDistance <= 0.1f)
+            {
+                StateStop();
 
-    private IEnumerator CheckStateStop(CashRegister cashRegister, int indexPosition)
+                yield break;
+            }
+        }
+    }
+    
+    private IEnumerator CheckDistanceStop(CashRegister cashRegister, int indexPosition)
     {
         while (true)
         {
@@ -190,6 +220,8 @@ public class BotController : MonoBehaviour
             {
                 cashRegister.PositionForBots[indexPosition].ComeToWaypoint(cashRegister, this);
                 StateStop();
+
+                yield break;
             }
         }
     }
@@ -205,10 +237,5 @@ public class BotController : MonoBehaviour
         _agent.isStopped = true;
 
         _animator.SetBool(_currentAnimation, false);        
-    }
-
-    private void SetAnimation(string key, bool value)
-    {
-        _animator.SetBool(key, value);
     }
 }

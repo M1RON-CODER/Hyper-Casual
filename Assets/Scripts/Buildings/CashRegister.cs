@@ -25,18 +25,18 @@ public class CashRegister : MonoBehaviour
 
         public void ComeToWaypoint(CashRegister cashRegister, BotController bot)
         {
-            cashRegister.ServeBot();
             _bot = bot;
+            cashRegister.ServeBot(this);
         }
     }
 
-    [SerializeField] private GameObject _boxPrefab;
+    [SerializeField] private Box _boxPrefab;
     [SerializeField] private Transform _boxPosition;
-    [SerializeField] private List<BotParams> _positionsForBots = new List<BotParams>();
+    [SerializeField] private List<BotParams> _botParams = new List<BotParams>();
 
     private bool _isHaveEmployee;
 
-    public List<BotParams> PositionForBots => _positionsForBots;
+    public List<BotParams> PositionForBots => _botParams;
 
     #region MonoBehaviour
     private void Awake()
@@ -61,17 +61,21 @@ public class CashRegister : MonoBehaviour
     }
     #endregion
 
-    public void ServeBot()
+    public void ServeBot(BotParams botParams)
     {
-        return;
-        BotParams bot = _positionsForBots.First();
+        if (!CheckFirstBot(botParams))
+        {
+            return;
+        }
 
-        MoveResourcesInBox(bot.Bot.ResourcesInHands);
+        BotParams bot = _botParams.First();
+
+        MoveResourcesInBox(bot.Bot);
     }
 
     public Transform GetPosition()
     {
-        foreach (var position in _positionsForBots)
+        foreach (var position in _botParams)
         {
             if (!position.IsBusyPlace)
             {
@@ -85,9 +89,9 @@ public class CashRegister : MonoBehaviour
 
     public int GetIndexBotPosition(Transform position)
     {
-        for (int i = 0; i < _positionsForBots.Count; i++)
+        for (int i = 0; i < _botParams.Count; i++)
         {
-            if(_positionsForBots[i].position == position)
+            if(_botParams[i].position == position)
             {
                 return i;
             }
@@ -96,12 +100,13 @@ public class CashRegister : MonoBehaviour
         return -1;
     }
 
-    private void MoveResourcesInBox(List<GameObject> resources)
+    private void MoveResourcesInBox(BotController bot)
     {
-        Box box = InstantiateBox();
+        Box box = Instantiate(_boxPrefab.gameObject, _boxPosition.position, Quaternion.identity).GetComponent<Box>();
 
         int index = 0;
-        foreach (GameObject resource in resources.ToList())
+        float duration = 0.3f;
+        foreach (GameObject resource in bot.ResourcesInHands.ToList())
         {
             if(index > box.Positions.Count - 1)
             {
@@ -109,12 +114,17 @@ public class CashRegister : MonoBehaviour
             }
 
             resource.transform.SetParent(box.transform);
-            resource.transform.DOLocalMove(box.GetComponent<Box>().Positions[index].position, 0.1f);
+            resource.transform.DOLocalJump(box.Positions[index].position, 250, 1, duration);
 
             index++;
         }
 
-        Invoke(nameof(NextBuyer), resources.Count * 0.1f);
+        bot.SetAnimation(Keys.CarryingIdle, false);
+        bot.SetAnimation(Keys.Idle, true);   
+        
+        box.transform.SetParent(bot.Hands.transform);
+        box.transform.DOLocalMove(Vector3.zero, 0.3f);
+        Invoke(nameof(NextBuyer), bot.ResourcesInHands.Count * duration + 0.3f);
     }
 
     private Box InstantiateBox()
@@ -124,20 +134,28 @@ public class CashRegister : MonoBehaviour
 
     private void NextBuyer()
     {
-        _positionsForBots.First().SetBusyPlace(false);
+        _botParams.First().Bot.MoveTowardsExit();
 
         if (GetBusyPlace())
         {
-            for (int i = 0; i < _positionsForBots.Count; i++)
+            for (int i = 0; i < _botParams.Count; i++)
             {
-
+                if(i == _botParams.Count - 1)
+                {
+                    _botParams[i] = new BotParams();
+                }
+                
+                _botParams[i] = _botParams[i + 1];
+                _botParams[i].Bot.MovePosition(_botParams[i].position);
             }
+
+            ServeBot(_botParams.First());
         }
     }
 
     private bool GetBusyPlace()
     {
-        foreach(BotParams bot in _positionsForBots.ToList())
+        foreach(BotParams bot in _botParams.ToList())
         {
             if (bot.IsBusyPlace)
             {
@@ -146,5 +164,10 @@ public class CashRegister : MonoBehaviour
         }
 
         return false;
+    }
+
+    private bool CheckFirstBot(BotParams bot)
+    {
+        return _botParams.FindIndex(x => x == bot) == 0;
     }
 }

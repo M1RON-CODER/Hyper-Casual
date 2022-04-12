@@ -9,6 +9,7 @@ public class BotManager : MonoBehaviour
     [SerializeField] private List<Transform> _spawnPoints = new List<Transform>();
     [SerializeField] private List<GameObject> _waypoints = new List<GameObject>();
     [SerializeField] private List<CashRegister> _cashRegisters = new List<CashRegister>();
+    [SerializeField] private Transform _exit;
     [Min(1)] [SerializeField] private int _maxCountBotOnOneWaypoint;
 
     private List<GameObject> _bots = new List<GameObject>();
@@ -35,7 +36,7 @@ public class BotManager : MonoBehaviour
             }
             
             GameObject bot = Instantiate(_bot, _spawnPoints[Random.Range(0, _spawnPoints.Count)].transform.position, Quaternion.identity);    
-            bot.GetComponent<BotController>().Initialize(_cashRegisters, _sprites);
+            bot.GetComponent<BotController>().Initialize(_cashRegisters, _sprites, _exit);
             bot.GetComponent<BotController>().SetWaypoints(_waypoints);
             
             _bots.Add(bot);
