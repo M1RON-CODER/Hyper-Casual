@@ -113,6 +113,12 @@ public class BotController : MonoBehaviour
         return true;
     }
 
+    public void RemoveResourceInHands(GameObject resource)
+    {
+        resource.transform.SetParent(null);
+        _resourcesInHands.Remove(resource);
+    }
+
     public void MovePosition(Transform point)
     {
         Move();
@@ -153,11 +159,27 @@ public class BotController : MonoBehaviour
     // ----------------- ?
 /*    private void MoveToCashRegister()
     {
+<<<<<<< HEAD
         Transform botPosition = _cashRegister.GetPosition();
         _agent.destination = botPosition.position;
         int indexPosition = cashReg.GetIndexBotPosition(botPosition);
+=======
+        Dictionary<CashRegister, float> distance = new Dictionary<CashRegister, float>();
         
-        StartCoroutine(CheckDistanceStop(cashReg, indexPosition));
+        foreach (CashRegister cashRegister in _cashRegisters)
+        {
+            distance.Add(cashRegister, Vector3.Distance(cashRegister.transform.position, transform.position));
+        }
+
+        var cashReg = distance.Where(x => x.Value == distance.Values.Min()).FirstOrDefault().Key;
+
+        //Transform botPosition = cashReg.GetPosition();
+        //Debug.Log("Bot position: " + botPosition);
+        //_agent.destination = botPosition.position;
+        //int indexPosition = cashReg.GetIndexBotPosition(botPosition);
+>>>>>>> Cash-Register
+        
+        //StartCoroutine(CheckDistanceStop(cashReg, indexPosition));
 
         StateMove();
     }*/
@@ -183,7 +205,12 @@ public class BotController : MonoBehaviour
             yield return new WaitForSeconds(0.3f);
             if (_agent.remainingDistance <= 0.1f)
             {
+<<<<<<< HEAD
                 cashRegister.PositionForBots[indexPosition].ComeToWaypoint(cashRegister, this);
+=======
+                //cashRegister.PositionForBots[indexPosition].ComeToWaypoint(cashRegister, this);
+                StateStop();
+>>>>>>> Cash-Register
 
                 yield break;
             }
