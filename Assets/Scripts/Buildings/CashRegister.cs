@@ -44,74 +44,120 @@ public class CashRegister : MonoBehaviour
     private void Awake()
     {
         Initialize();
+    }
 
-        Debug.Log(UnoccupiedPlace());
+    private void OnTriggerEnter(Collider other)
+    {
+        _isHaveEmployee = true;
+        Serve();
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        _isHaveEmployee = false;
     }
     #endregion
 
     public void Serve()
     {
-        Queue queue = _queues.First();
+        if (_isHaveEmployee)
+        {
+            Queue queue = _queues.FirstOrDefault();
+            if ((queue.Bot != null) && (queue.Bot.ResourcesInHands.Count > 0))
+            {
+                Box box = InstantiateBox();
+                MoveResourcesToBox(queue, box);
+            }
+        }
+/*        Queue queue = _queues.First();
 
         Box box = InstantiateBox();
-        MoveResourcesToBox(queue, box);
+        MoveResourcesToBox(queue, box);*/
     }
-
+   
     public int UnoccupiedPlace()
     {
         return _queues.FindIndex(q => !q.IsBusyPlace);
     }
 
+    public int CurrentIndex(BotController bot)
+    {
+        return _queues.FindIndex(q => q.Bot == bot);
+    }
+    
     private void MoveResourcesToBox(Queue queue, Box box)
     {
         int index = 0;
-        float duration = 0.3f;
+        float duration = 0.7f;
+        
+        GameObject lastResource = queue.Bot.ResourcesInHands.Last().gameObject;
+            
         foreach (GameObject resource in queue.Bot.ResourcesInHands.ToList())
         {
-            if (index >= queue.Bot.ResourcesInHands.Count - 1)
+            if (index >= box.Positions.Count - 1)
             {
                 index = 0;
             }
 
             queue.Bot.ResourcesInHands.Remove(resource);
             resource.transform.SetParent(box.transform);
-            resource.transform.DOLocalJump(box.Positions[index].position, 250, 1, duration);
-            
+
+            if (resource.Equals(lastResource))
+            {
+                resource.transform.DOLocalJump(box.Positions[index].localPosition, 250, 1, duration).OnComplete(() =>
+                {
+                    MoveBoxToHands(box, queue.Bot, queue.Bot.MoveTowardsExit);
+                });
+                return;
+            }
+            else
+            {
+                resource.transform.DOLocalJump(box.Positions[index].localPosition, 250, 1, duration);
+            }
+
             index++;
-        }
-        
-        MoveBoxToHands(box, queue.Bot.Hands.transform, queue.Bot.MoveTowardsExit);
-        NextBuyer();   
+        } 
     }
 
     private void NextBuyer()
     {
-        for (int i = 0; i < _queues.Count; i++)
+        for (int i = 0; i < _queues.Count - 1; i++)
         {
-            if(i == _queues.Count - 1)
+            if(_queues[i + 1].Bot == null)
             {
-                _queues[i] = new Queue(_queues[i].Position);
+                _queues[i] = new Queue(_positions[i]);
+                return;
             }
-
+            
             _queues[i].SetBusyPlace(_queues[i + 1].Bot);
-        }
-
-        if(_queues.First().Bot != null)
-        {
-            Serve();
+            _queues[i].Bot.MovePosition(_positions[i]);
         }
     }
 
-    private void MoveBoxToHands(Box box, Transform hands, Action moveTowardsExit)
+    private void MoveBoxToHands(Box box, BotController bot, Action moveTowardsExit)
     {
-        float duration = 0.3f;
-        box.transform.DORotate(new Vector3(0, 90, 0), duration);
-        box.transform.SetParent(hands);
-        box.transform.DOMove(Vector3.zero, duration).OnComplete(moveTowardsExit.Invoke);
+        float duration = 0.4f;
+
+        bot.ResourcesInHands.Add(box.gameObject);
+
+        box.transform.SetParent(bot.Hands.transform);
+        box.transform.DOLocalRotate(new Vector3(0, 90, 0), duration);
+        box.transform.DOLocalMove(Vector3.zero, duration).OnComplete(() => 
+        {
+            moveTowardsExit.Invoke();
+            bot.Manager.RemoveBotFromQueue(bot);
+            NextBuyer();
+        });
     }
 
     private Box InstantiateBox()
     {
+
+        /*Box box = Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity);
+        Vector3 endScale = box.transform.localScale;
+        box.transform.localScale = Vector3.zero;
+        box.transform.DOScale(endScale, 0.5f);*/
+
         return Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity);
     }
 
@@ -123,167 +169,3 @@ public class CashRegister : MonoBehaviour
         }
     }
 }
-
-
-/*    [Serializable]
-    public class BotParams
-    {
-        public Transform position;
-        private BotController _bot;
-        private bool _isBusyPlace;
-
-        public BotController Bot => _bot;
-        public bool IsBusyPlace => _isBusyPlace;
-
-        public void SetBusyPlace(bool isFreeSpace)
-        {
-            _isBusyPlace = isFreeSpace;
-        }
-
-        public void ComeToWaypoint(CashRegister cashRegister, BotController bot)
-        {
-            _bot = bot;
-            cashRegister.ServeBot(this);
-        }
-    }
-
-    [SerializeField] private Box _boxPrefab;
-    [SerializeField] private Transform _boxPosition;
-    [SerializeField] private List<BotParams> _botParams = new List<BotParams>();
-
-    private bool _isHaveEmployee;
-
-    public List<BotParams> PositionForBots => _botParams;
-
-    #region MonoBehaviour
-    private void Awake()
-    {
-        
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.TryGetComponent(out PlayerController player))
-        {
-            _isHaveEmployee = true;
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.TryGetComponent(out PlayerController player))
-        {
-            _isHaveEmployee = false;
-        }
-    }
-    #endregion
-
-    public void ServeBot(BotParams botParams)
-    {
-        if (!CheckFirstBot(botParams))
-        {
-            return;
-        }
-
-        BotParams bot = _botParams.First();
-
-        MoveResourcesInBox(bot.Bot);
-    }
-
-    public Transform GetPosition()
-    {
-        foreach (var position in _botParams)
-        {
-            if (!position.IsBusyPlace)
-            {
-                position.SetBusyPlace(true);
-                return position.position;
-            }
-        }
-
-        return null;
-    }
-
-    public int GetIndexBotPosition(Transform position)
-    {
-        for (int i = 0; i < _botParams.Count; i++)
-        {
-            if(_botParams[i].position == position)
-            {
-                return i;
-            }
-        }
-        
-        return -1;
-    }
-
-    private void MoveResourcesInBox(BotController bot)
-    {
-        Box box = Instantiate(_boxPrefab.gameObject, _boxPosition.position, Quaternion.identity).GetComponent<Box>();
-
-        int index = 0;
-        float duration = 0.3f;
-        foreach (GameObject resource in bot.ResourcesInHands.ToList())
-        {
-            if(index > box.Positions.Count - 1)
-            {
-                index = 0;
-            }
-
-            resource.transform.SetParent(box.transform);
-            resource.transform.DOLocalJump(box.Positions[index].position, 250, 1, duration);
-
-            index++;
-        }
-
-        bot.SetAnimation(Keys.CarryingIdle, false);
-        bot.SetAnimation(Keys.Idle, true);   
-        
-        box.transform.SetParent(bot.Hands.transform);
-        box.transform.DOLocalMove(Vector3.zero, 0.3f);
-        Invoke(nameof(NextBuyer), bot.ResourcesInHands.Count * duration + 0.3f);
-    }
-
-    private Box InstantiateBox()
-    {
-        return Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity).GetComponent<Box>();
-    }
-
-    private void NextBuyer()
-    {
-        _botParams.First().Bot.MoveTowardsExit();
-
-        if (GetBusyPlace())
-        {
-            for (int i = 0; i < _botParams.Count; i++)
-            {
-                if(i == _botParams.Count - 1)
-                {
-                    _botParams[i] = new BotParams();
-                }
-                
-                _botParams[i] = _botParams[i + 1];
-                _botParams[i].Bot.MovePosition(_botParams[i].position);
-            }
-
-            ServeBot(_botParams.First());
-        }
-    }
-
-    private bool GetBusyPlace()
-    {
-        foreach(BotParams bot in _botParams.ToList())
-        {
-            if (bot.IsBusyPlace)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private bool CheckFirstBot(BotParams bot)
-    {
-        return _botParams.FindIndex(x => x == bot) == 0;
-    }*/

@@ -19,7 +19,7 @@ public class ResourceStorage : Resource
     {
         if (other.TryGetComponent(out BotController bot))
         {
-            bot.OnObjectEnter(this);
+            bot.Stop();
             _bots.Add(bot);
 
             AllocateResourcesToBot(bot);
@@ -33,22 +33,22 @@ public class ResourceStorage : Resource
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent(out BotController agent))
+        if (other.TryGetComponent(out BotController bot))
         {
-            agent.OnObjectExit();
-            _bots.Remove(agent);
+            bot.Move();
+            _bots.Remove(bot);
         }
     }
     #endregion
     
     protected void AddResourceToStorage(PlayerController player)
     {
-        if (_resources.Count == _positions.Count || player.ResourcesOnHands.Count == 0)
+        if ((_resources.Count == _positions.Count) || (player.ResourcesInHands.Count == 0))
         {
             return;
         }
 
-        foreach (ResourceParams resource in player.ResourcesOnHands.ToList())
+        foreach (ResourceParams resource in player.ResourcesInHands.ToList())
         {
             if(_resources.Count >= _positions.Count)
             {
@@ -103,10 +103,10 @@ public class ResourceStorage : Resource
             _resources.Remove(_resources.First());
 
             if (bot.AddResourceToHands(resource))
-            { 
-                StartCoroutine(bot.NextTarget());
+            {
+                bot.NextTarget();
                 _bots.Remove(bot);
-                    
+                
                 return;
             }
         }   
@@ -116,18 +116,18 @@ public class ResourceStorage : Resource
     {      
         foreach (BotController bot in _bots.ToList())
         {
-            foreach (ResourceParams resource in player.ResourcesOnHands.ToList())
+            foreach (ResourceParams resource in player.ResourcesInHands.ToList())
             {
                 if(resource.Resource != CurrentResource)
                 {
                     continue;
                 }
                 
-                player.ResourcesOnHands.Remove(resource);
+                player.ResourcesInHands.Remove(resource);
 
                 if (bot.AddResourceToHands(resource.Obj))
                 {
-                    StartCoroutine(bot.NextTarget());
+                    bot.NextTarget();
                     _bots.Remove(bot);
 
                     return;

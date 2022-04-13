@@ -43,13 +43,14 @@ public class BotController : MonoBehaviour
     private NavMeshAgent _agent;
     private Animator _animator;
     private CashRegister _cashRegister;
+    private BotManager _botManager;
     private Transform _exitPoint; 
-    
     private string _currentAnimation = Keys.Idle;
 
     public GameObject Hands => _hands;
     public List<GameObject> ResourcesInHands => _resourcesInHands;
     public NavMeshAgent Agent => _agent;
+    public BotManager Manager => _botManager;
 
     #region MonoBehaviour
     private void Awake()
@@ -59,8 +60,9 @@ public class BotController : MonoBehaviour
     }
     #endregion
 
-    public void Initialize(CashRegister cashRegister, Transform exitPoint)
+    public void Initialize(BotManager botManager, CashRegister cashRegister, Transform exitPoint)
     {
+        _botManager = botManager;
         _cashRegister = cashRegister;
         _exitPoint = exitPoint;
     }
@@ -76,7 +78,8 @@ public class BotController : MonoBehaviour
     public void Stop()
     {
         _agent.isStopped = true;
-        
+
+        SettingAnimation();
         _animator.SetBool(_currentAnimation, false);
     }
 
@@ -84,7 +87,7 @@ public class BotController : MonoBehaviour
     {
         foreach (GameObject waypoint in waypoints)
         {
-            _targets.Add(new TargetParams(waypoint.transform, waypoint.GetComponent<Resource>().CurrentResource, Random.Range(1, 2)));
+            _targets.Add(new TargetParams(waypoint.transform, waypoint.GetComponent<Resource>().CurrentResource, Random.Range(1, 4)));
         }
 
         MoveWaypoint();
@@ -92,10 +95,10 @@ public class BotController : MonoBehaviour
 
     public bool AddResourceToHands(GameObject resource)
     {
-        TargetParams target = _targets.First();
-        if (target.CurrentCountResources >= target.TotalCountResources)
+        TargetParams target = _targets.FirstOrDefault();
+        if ((target == null) || (target.CurrentCountResources >= target.TotalCountResources))
         {
-            return false;
+            return true;
         }
 
         float resourcePositionY = _resourcesInHands.Count == 0 ? 0 : _resourcesInHands.Count * resource.transform.localScale.y;
@@ -108,9 +111,9 @@ public class BotController : MonoBehaviour
 
         _botBar.UpdateData(target.CurrentCountResources, target.TotalCountResources);
 
-        SettingAnimation();
+        Stop();
 
-        return true;
+        return target.CurrentCountResources >= target.TotalCountResources;
     }
 
     public void RemoveResourceInHands(GameObject resource)
@@ -120,15 +123,16 @@ public class BotController : MonoBehaviour
     }
 
     public void MovePosition(Transform point)
-    {
-        Move();
-        
+    {        
         _agent.destination = point.position;
+        Move();
         StartCoroutine(CheckDistanceStop());
     }
    
+    // Ошибка 
     public void NextTarget()
-    {   
+    {
+        // При удаление первого элемента в списке происходит ошибка
         _targets.Remove(_targets.First());
         if(_targets.Count == 0)
         {
@@ -144,6 +148,7 @@ public class BotController : MonoBehaviour
     {
         Move();
         _agent.destination = _exitPoint.position;
+        StartCoroutine(CheckDistanceForDestroy());
     }
 
     private void MoveWaypoint()
@@ -155,68 +160,58 @@ public class BotController : MonoBehaviour
 
         _botBar.SetData(target.Resource, target.CurrentCountResources, target.TotalCountResources);
     }
-    
-    // ----------------- ?
-/*    private void MoveToCashRegister()
+
+    private void MoveToCashRegister()
     {
-<<<<<<< HEAD
-        Transform botPosition = _cashRegister.GetPosition();
-        _agent.destination = botPosition.position;
-        int indexPosition = cashReg.GetIndexBotPosition(botPosition);
-=======
-        Dictionary<CashRegister, float> distance = new Dictionary<CashRegister, float>();
-        
-        foreach (CashRegister cashRegister in _cashRegisters)
-        {
-            distance.Add(cashRegister, Vector3.Distance(cashRegister.transform.position, transform.position));
-        }
+        // Debug.Log($"{this.name} MoveToCashRegister");
+        int index = _cashRegister.UnoccupiedPlace();
+        CashRegister.Queue queue = _cashRegister.Queues[index];
+        queue.SetBusyPlace(this);
 
-        var cashReg = distance.Where(x => x.Value == distance.Values.Min()).FirstOrDefault().Key;
+        _agent.destination = queue.Position.position;
 
-        //Transform botPosition = cashReg.GetPosition();
-        //Debug.Log("Bot position: " + botPosition);
-        //_agent.destination = botPosition.position;
-        //int indexPosition = cashReg.GetIndexBotPosition(botPosition);
->>>>>>> Cash-Register
-        
-        //StartCoroutine(CheckDistanceStop(cashReg, indexPosition));
+        StartCoroutine(CheckDistanceStop());
 
-        StateMove();
-    }*/
+        Move();
+    }
 
     private IEnumerator CheckDistanceStop()
     {
+        // Debug.Log($"{this.name} Check Distance Stop");
         while (true)
         {
             yield return new WaitForSeconds(0.3f);
+            
             if (_agent.remainingDistance <= 0.1f)
             {
+                // Debug.Log($"{this.name} is stoped");
                 Stop();
+
+                int index = _cashRegister.CurrentIndex(this);
+
+                if(index == 0)
+                {
+                    _cashRegister.Serve();
+                }
+
                 yield break;
             }
         }
     }
 
-/*    // ----------- ?
-    private IEnumerator CheckDistanceStop(CashRegister cashRegister, int indexPosition)
+    private IEnumerator CheckDistanceForDestroy()
     {
         while (true)
         {
-            yield return new WaitForSeconds(0.3f);
-            if (_agent.remainingDistance <= 0.1f)
+            yield return new WaitForSeconds(1f);
+            if (_agent.remainingDistance <= 1f)
             {
-<<<<<<< HEAD
-                cashRegister.PositionForBots[indexPosition].ComeToWaypoint(cashRegister, this);
-=======
-                //cashRegister.PositionForBots[indexPosition].ComeToWaypoint(cashRegister, this);
-                StateStop();
->>>>>>> Cash-Register
-
+                _botManager.DestroyBot(this);
                 yield break;
             }
         }
-    }*/
-    
+    }
+
     private void SettingAnimation()
     {
         if (_resourcesInHands.Count > 0)
@@ -227,7 +222,7 @@ public class BotController : MonoBehaviour
             _animator.SetBool(Keys.Idle, false);
             _animator.SetBool(Keys.Walking, false);
 
-            _currentAnimation = Keys.CarryingIdle;
+            _currentAnimation = Keys.CarryingWalking;
         }
         else
         {

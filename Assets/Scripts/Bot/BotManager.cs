@@ -15,9 +15,10 @@ public class BotManager : MonoBehaviour
 
     private List<GameObject> _bots = new List<GameObject>();
     private int _maxCountBots;
+    private int _numberBot;
 
     #region MonoBehavior
-    
+
     private void Start()
     {
         _maxCountBots = _waypoints.Count * _maxCountBotOnOneWaypoint;
@@ -33,27 +34,40 @@ public class BotManager : MonoBehaviour
 
             if(_bots.Count == _maxCountBots)
             {
-                yield break;
+                continue;
             }
 
             List<GameObject> waypoints = GetWaypoints();
             CashRegister cashRegister = GetNearestCashRegister(waypoints.Last());
             
-            GameObject bot = Instantiate(_bot, _spawnPoints[Random.Range(0, _spawnPoints.Count)].transform.position, Quaternion.identity);    
-            bot.GetComponent<BotController>().Initialize(cashRegister, _exitPoint);
+            GameObject bot = Instantiate(_bot, _spawnPoints[Random.Range(0, _spawnPoints.Count)].transform.position, Quaternion.identity);
+            bot.name = $"Bot_{++_numberBot}";
+            bot.GetComponent<BotController>().Initialize(this, cashRegister, _exitPoint);
             bot.GetComponent<BotController>().SetTargets(waypoints);
             
             _bots.Add(bot);
         }  
     }
 
+    public void DestroyBot(BotController bot)
+    {
+        Destroy(bot.gameObject);
+    }
+
+    public void RemoveBotFromQueue(BotController bot)
+    {
+        _bots.Remove(bot.gameObject);
+    }
+
     private List<GameObject> GetWaypoints()
     {
-        List<GameObject> waypoints = _waypoints.ToList();
-        for (int i = 0; i < (_waypoints.Count >= 4 ? Random.Range(1, 4) : Random.Range(1, _waypoints.Count)); i++)
+        List<GameObject> allWaypoints = _waypoints.ToList();
+        List<GameObject> waypoints = new List<GameObject>(); 
+        for (int i = 0; i < (allWaypoints.Count >= 4 ? Random.Range(1, 4) : Random.Range(1, allWaypoints.Count)); i++)
         {
-            int index = Random.Range(0, _waypoints.Count);
-            waypoints.RemoveAt(index);
+            int index = Random.Range(0, allWaypoints.Count);
+            waypoints.Add(allWaypoints[index]);
+            allWaypoints.RemoveAt(index);
         }
 
         return waypoints;

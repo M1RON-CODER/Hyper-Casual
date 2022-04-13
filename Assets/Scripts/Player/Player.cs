@@ -11,7 +11,7 @@ public abstract class Player : MonoBehaviour
     private List<Resource.ResourceParams> _resourcesOnHands = new List<Resource.ResourceParams>();
     private int _maxCountOnHands = 3;
 
-    public List<Resource.ResourceParams> ResourcesOnHands => _resourcesOnHands;
+    public List<Resource.ResourceParams> ResourcesInHands => _resourcesOnHands;
     public GameObject PlayerObj => _playerObj;
     public GameObject Hands => _hands;
     public int MaxCountOnHands => _maxCountOnHands; 

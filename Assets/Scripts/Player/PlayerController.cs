@@ -12,7 +12,6 @@ public class PlayerController : Player
 
     private Animator _animator;
     private Rigidbody _rigidbody;
-    
     private string _currentAnimation = Keys.Running;
 
     public string CurrentAnimation => _currentAnimation;
@@ -43,88 +42,73 @@ public class PlayerController : Player
 
     public bool AddResourcesOnHands(Resource.Resources resource, GameObject obj)
     {
-        if (ResourcesOnHands.Count >= MaxCountOnHands)
+        if (ResourcesInHands.Count >= MaxCountOnHands)
         {
             return true;
         }
-
-        _animator.SetBool(Keys.Idle, false);
-        _animator.SetBool(Keys.Running, false);
-        _animator.SetBool(Keys.CarryingRunning, true);
-        _animator.SetBool(Keys.CarryingIdle, true);
-
-        _currentAnimation = Keys.CarryingRunning;
         
         Vector3 position = GetPositionForResourceInHands();
         obj.transform.SetParent(Hands.transform);
         obj.transform.DOLocalMove(position, 0.2f);
 
-        ResourcesOnHands.Insert(0, (new Resource.ResourceParams { Obj = obj, Resource = resource }));
+        ResourcesInHands.Insert(0, (new Resource.ResourceParams { Obj = obj, Resource = resource }));
+
+        SettingsAnimation();
 
         return false;
     }
     
     public void RemoveResourceOnHands(Resource.ResourceParams resource)
     {
-        if (ResourcesOnHands.Count == 0)
+        if (ResourcesInHands.Count == 0)
         {
             return;
         }
         
         resource.Obj.transform.SetParent(null);
-        ResourcesOnHands.Remove(resource);
+        ResourcesInHands.Remove(resource);
 
-        if(ResourcesOnHands.Count == 0)
-        {
-            _animator.SetBool(Keys.Idle, true);
-            _animator.SetBool(Keys.Running, true);
-            _animator.SetBool(Keys.CarryingIdle, false);
-            _animator.SetBool(Keys.CarryingRunning, false);
-            _currentAnimation = Keys.Running;
-        }
-    }
-
-    public void GiveResources()
-    {
-        if(ResourcesOnHands.Count == 0)
-        {
-            _animator.SetBool(Keys.CarryingRunning, false);
-            _currentAnimation = Keys.Running;
-        }
-    }
-
-    public IEnumerator RemoveResourcesOnHands()
-    {
-        _currentAnimation = Keys.Running;
-        _animator.SetBool(Keys.CarryingRunning, false);
-
-        for (int i = 0; i < ResourcesOnHands.Count;)
-        {
-            Destroy(ResourcesOnHands[i].Obj);
-            ResourcesOnHands.RemoveAt(i);
-            yield return new WaitForSeconds(0.05f);
-        }
-    }
-
-    public void DestroyResourcesOnHands()
-    {
-        ResourcesOnHands.Clear();
+        SettingsAnimation();
     }
 
     private Vector3 GetPositionForResourceInHands()
     {
-        if (ResourcesOnHands.Count == 0)
+        if (ResourcesInHands.Count == 0)
         {
             return Vector3.zero;
         }
 
         Vector3 position = Vector3.zero;
         
-        foreach (Resource.ResourceParams resource in ResourcesOnHands)
+        foreach (Resource.ResourceParams resource in ResourcesInHands)
         {
             position.y += resource.Obj.transform.localScale.x;
         }
 
         return position;    
+    }
+
+    private void SettingsAnimation()
+    {
+        if (ResourcesInHands.Count > 0)
+        {
+            _animator.SetBool(Keys.CarryingIdle, true);
+            _animator.SetBool(Keys.CarryingRunning, true);
+
+            _animator.SetBool(Keys.Idle, false);
+            _animator.SetBool(Keys.Running, false);
+
+            _currentAnimation = Keys.CarryingRunning;
+        }
+        else
+        {
+            _animator.SetBool(Keys.Idle, true);
+            _animator.SetBool(Keys.Running, true);
+
+            _animator.SetBool(Keys.CarryingIdle, false);
+            _animator.SetBool(Keys.CarryingRunning, false);
+
+            _currentAnimation = Keys.Running;
+        }
     }
 }
