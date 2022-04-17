@@ -193,6 +193,7 @@ public class CashRegister : MonoBehaviour
 
     private Box InstantiateBox()
     {
+
         /*Box box = Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity);
         Vector3 endScale = box.transform.localScale;
         box.transform.localScale = Vector3.zero;
