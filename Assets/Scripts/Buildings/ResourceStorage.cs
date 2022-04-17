@@ -10,19 +10,19 @@ public class ResourceStorage : Resource
     [SerializeField] private List<Transform> _positions = new List<Transform>();
 
     private List<GameObject> _resources = new List<GameObject>();
-    private List<BotController> _bots = new List<BotController>();
+    private List<AIController> _AI = new List<AIController>();
 
     public new List<GameObject> Resources => _resources;
 
     #region MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out BotController bot))
+        if (other.TryGetComponent(out AIController AI))
         {
-            bot.Stop();
-            _bots.Add(bot);
+            AI.Stop();
+            _AI.Add(AI);
 
-            AllocateResourcesToBot(bot);
+            AllocateResourcesToAI(AI);
         }
         
         if (other.TryGetComponent(out PlayerController player))
@@ -33,10 +33,10 @@ public class ResourceStorage : Resource
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent(out BotController bot))
+        if (other.TryGetComponent(out AIController AI))
         {
-            bot.Move();
-            _bots.Remove(bot);
+            AI.Move();
+            _AI.Remove(AI);
         }
     }
     #endregion
@@ -60,16 +60,16 @@ public class ResourceStorage : Resource
                 continue;
             }
 
-            if (_bots.Count > 0)
+            if (_AI.Count > 0)
             {
-                PassResourcesToBots(player);
+                PassResourcesToAIs(player);
                 AddResourceToStorage(player);
                 return;
             }
             
             _resources.Insert(0, resource.Obj);
             
-            if(_bots.Count == 0)
+            if(_AI.Count == 0)
             {
                 resource.Obj.transform.DOMove(_positions[_resources.Count - 1].position, 0.3f);
             }
@@ -91,7 +91,7 @@ public class ResourceStorage : Resource
         return null;
     }
     
-    private void AllocateResourcesToBot(BotController bot)
+    private void AllocateResourcesToAI(AIController AI)
     {      
         if (_resources.Count == 0)
         {
@@ -102,19 +102,19 @@ public class ResourceStorage : Resource
         {
             _resources.Remove(_resources.First());
 
-            if (bot.AddResourceToHands(resource))
+            if (AI.AddResourceToHands(resource))
             {
-                bot.NextTarget();
-                _bots.Remove(bot);
+                AI.NextTarget();
+                _AI.Remove(AI);
                 
                 return;
             }
         }   
     }
 
-    private void PassResourcesToBots(PlayerController player)
+    private void PassResourcesToAIs(PlayerController player)
     {      
-        foreach (BotController bot in _bots.ToList())
+        foreach (AIController AI in _AI.ToList())
         {
             foreach (ResourceParams resource in player.ResourcesInHands.ToList())
             {
@@ -122,13 +122,13 @@ public class ResourceStorage : Resource
                 {
                     continue;
                 }
-                
-                player.ResourcesInHands.Remove(resource);
 
-                if (bot.AddResourceToHands(resource.Obj))
+                player.RemoveResourceOnHands(resource);
+
+                if (AI.AddResourceToHands(resource.Obj))
                 {
-                    bot.NextTarget();
-                    _bots.Remove(bot);
+                    AI.NextTarget();
+                    _AI.Remove(AI);
 
                     return;
                 }

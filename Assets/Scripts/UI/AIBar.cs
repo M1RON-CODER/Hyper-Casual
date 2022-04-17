@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 
 [RequireComponent(typeof(Sprites))]
-public class BotBar : MonoBehaviour
+public class AIBar : MonoBehaviour
 {
     [SerializeField] private TMP_Text _demand;
 
@@ -24,14 +24,41 @@ public class BotBar : MonoBehaviour
     }
     #endregion
 
+    public void SetData(Resource.Resources resource)
+    {
+        _sprites.SetSprite(resource);
+    }
+
+    public void SetData(Building.Buildings building)
+    {
+        _sprites.SetSprite(building);
+        _demand.gameObject.SetActive(false);    
+        //RefreshData();
+    }
+
     public void SetData(Resource.Resources resource, int currentCount, int totalCount)
     {
         _sprites.SetSprite(resource);
-        UpdateData(currentCount, totalCount);
+        RefreshData(currentCount, totalCount);
     }
 
-    public void UpdateData(int currentCount, int totalCount)
+    public void RefreshData(int currentCount, int totalCount)
     {
         _demand.text = $"{currentCount}/{totalCount}";
+    }
+
+    public void Show()
+    {
+        gameObject.SetActive(true);
+    }
+
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+    
+    private void RefreshData()
+    {
+        _demand.text = "";
     }
 }
