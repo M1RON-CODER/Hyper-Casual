@@ -7,7 +7,7 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(NavMeshAgent))]
-public class AIController : MonoBehaviour
+public class BotController : MonoBehaviour
 {
     private class TargetParams
     {
@@ -35,7 +35,7 @@ public class AIController : MonoBehaviour
     }
 
     [SerializeField] private GameObject _hands;
-    [SerializeField] private AIBar _AIBar;
+    [SerializeField] private BotBar _botBar;
 
     private List<TargetParams> _targets = new List<TargetParams>();
     private List<GameObject> _resourcesInHands = new List<GameObject>();
@@ -43,14 +43,14 @@ public class AIController : MonoBehaviour
     private NavMeshAgent _agent;
     private Animator _animator;
     private CashRegister _cashRegister;
-    private AIManager _AIManager;
+    private BotManager _botManager;
     private Transform _exitPoint; 
     private string _currentAnimation = Keys.Idle;
 
     public GameObject Hands => _hands;
     public List<GameObject> ResourcesInHands => _resourcesInHands;
     public NavMeshAgent Agent => _agent;
-    public AIManager AIManager => _AIManager;
+    public BotManager Manager => _botManager;
 
     #region MonoBehaviour
     private void Awake()
@@ -60,9 +60,9 @@ public class AIController : MonoBehaviour
     }
     #endregion
 
-    public void Initialize(AIManager AIManager, CashRegister cashRegister, Transform exitPoint)
+    public void Initialize(BotManager botManager, CashRegister cashRegister, Transform exitPoint)
     {
-        _AIManager = AIManager;
+        _botManager = botManager;
         _cashRegister = cashRegister;
         _exitPoint = exitPoint;
     }
@@ -105,11 +105,11 @@ public class AIController : MonoBehaviour
         resource.transform.SetParent(_hands.transform);
         resource.transform.DOLocalMove(new Vector3(0, resourcePositionY, 0), 0.2f);
         
-        _resourcesInHands.Insert(0, resource);
+        _resourcesInHands.Add(resource);
 
         target.CurrentResourcePlusOne();
 
-        _AIBar.RefreshData(target.CurrentCountResources, target.TotalCountResources);
+        _botBar.UpdateData(target.CurrentCountResources, target.TotalCountResources);
 
         Stop();
 
@@ -132,12 +132,7 @@ public class AIController : MonoBehaviour
     // Ошибка 
     public void NextTarget()
     {
-        if (_targets.Count == 0) 
-        {
-            return;
-        }
-        
-        // При удаление первого элемента в списке происходит ошибка   
+        // При удаление первого элемента в списке происходит ошибка
         _targets.Remove(_targets.First());
         if(_targets.Count == 0)
         {
@@ -152,7 +147,6 @@ public class AIController : MonoBehaviour
     public void MoveTowardsExit()
     {
         Move();
-        _AIBar.Hide();
         _agent.destination = _exitPoint.position;
         StartCoroutine(CheckDistanceForDestroy());
     }
@@ -164,7 +158,7 @@ public class AIController : MonoBehaviour
         
         Move();
 
-        _AIBar.SetData(target.Resource, target.CurrentCountResources, target.TotalCountResources);
+        _botBar.SetData(target.Resource, target.CurrentCountResources, target.TotalCountResources);
     }
 
     private void MoveToCashRegister()
@@ -179,7 +173,6 @@ public class AIController : MonoBehaviour
         StartCoroutine(CheckDistanceStop());
 
         Move();
-        _AIBar.SetData(Building.Buildings.CashRegister);
     }
 
     private IEnumerator CheckDistanceStop()
@@ -198,7 +191,6 @@ public class AIController : MonoBehaviour
 
                 if(index == 0)
                 {
-                    _cashRegister.Queues[index].SetOnSpot(true);
                     _cashRegister.Serve();
                 }
 
@@ -214,7 +206,7 @@ public class AIController : MonoBehaviour
             yield return new WaitForSeconds(1f);
             if (_agent.remainingDistance <= 1f)
             {
-                _AIManager.DestroyAI(this);
+                _botManager.DestroyBot(this);
                 yield break;
             }
         }

@@ -5,8 +5,9 @@ using UnityEngine;
 public class Sprites : MonoBehaviour
 {
     [SerializeField] private GameObject _firTree;
-    [SerializeField] private GameObject _cashRegister;
-    
+
+    public GameObject FirTree => _firTree;
+
     private GameObject _currentSprite;
 
     public void SetSprite(Resource.Resources resource)
@@ -20,25 +21,6 @@ public class Sprites : MonoBehaviour
         {
             case Resource.Resources.FirTree:
                 _currentSprite = _firTree;
-                break;
-            default:
-                break;
-        }
-
-        Show();
-    }
-
-    public void SetSprite(Building.Buildings building)
-    {
-        if (_currentSprite != null)
-        {
-            Hide();
-        }
-
-        switch (building)
-        {
-            case Building.Buildings.CashRegister:
-                _currentSprite = _cashRegister;
                 break;
             default:
                 break;

@@ -19,6 +19,4 @@ public class Keys
     public const string MaxCountOnHands = "MaxCountOnHands";
     public const string PlayerLevel = "PlayerLevel";
     public const string GetCash = "GetCash";
-    public const string ProgressIndex = "ProgressIndex";
-    public const string UnderProgressIndex = "UnderProgressIndex";
 }

@@ -17,7 +17,7 @@ public class CashData : MonoBehaviour
 
     public int Cash => _cash;
 
-    public void AddCash(int cash)
+    public void DepositCash(int cash)
     {
         _cash += cash;
         RefreshCash();

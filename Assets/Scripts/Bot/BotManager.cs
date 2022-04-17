@@ -3,25 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class AIManager : MonoBehaviour
+public class BotManager : MonoBehaviour
 {
-    [SerializeField] private GameObject _AIPrefab;
+    [SerializeField] private GameObject _bot;
     [SerializeField] private Sprites _sprites;
     [SerializeField] private List<Transform> _spawnPoints = new List<Transform>();
     [SerializeField] private List<GameObject> _waypoints = new List<GameObject>();
     [SerializeField] private List<CashRegister> _cashRegisters = new List<CashRegister>();
     [SerializeField] private Transform _exitPoint;
-    [Min(4)] [SerializeField] private int _maxCountAIOnOneWaypoint;
+    [Min(1)] [SerializeField] private int _maxCountBotOnOneWaypoint;
 
-    private List<GameObject> _AI = new List<GameObject>();
-    private int _maxCountAI;
-    private int _numberAI;
+    private List<GameObject> _bots = new List<GameObject>();
+    private int _maxCountBots;
+    private int _numberBot;
 
     #region MonoBehavior
 
     private void Start()
     {
-        _maxCountAI = _waypoints.Count * _maxCountAIOnOneWaypoint;
+        _maxCountBots = _waypoints.Count * _maxCountBotOnOneWaypoint;
         StartCoroutine(CreateBot());
     }
     #endregion
@@ -32,7 +32,7 @@ public class AIManager : MonoBehaviour
         {
             yield return new WaitForSeconds(Random.Range(1, 3));
 
-            if(_AI.Count == _maxCountAI)
+            if(_bots.Count == _maxCountBots)
             {
                 continue;
             }
@@ -40,23 +40,23 @@ public class AIManager : MonoBehaviour
             List<GameObject> waypoints = GetWaypoints();
             CashRegister cashRegister = GetNearestCashRegister(waypoints.Last());
             
-            GameObject bot = Instantiate(_AIPrefab, _spawnPoints[Random.Range(0, _spawnPoints.Count)].transform.position, Quaternion.identity);
-            bot.name = $"Bot_{++_numberAI}";
-            bot.GetComponent<AIController>().Initialize(this, cashRegister, _exitPoint);
-            bot.GetComponent<AIController>().SetTargets(waypoints);
+            GameObject bot = Instantiate(_bot, _spawnPoints[Random.Range(0, _spawnPoints.Count)].transform.position, Quaternion.identity);
+            bot.name = $"Bot_{++_numberBot}";
+            bot.GetComponent<BotController>().Initialize(this, cashRegister, _exitPoint);
+            bot.GetComponent<BotController>().SetTargets(waypoints);
             
-            _AI.Add(bot);
+            _bots.Add(bot);
         }  
     }
 
-    public void DestroyAI(AIController AI)
+    public void DestroyBot(BotController bot)
     {
-        Destroy(AI.gameObject);
+        Destroy(bot.gameObject);
     }
 
-    public void RemoveAIFromQueue(AIController AI)
+    public void RemoveBotFromQueue(BotController bot)
     {
-        _AI.Remove(AI.gameObject);
+        _bots.Remove(bot.gameObject);
     }
 
     private List<GameObject> GetWaypoints()
