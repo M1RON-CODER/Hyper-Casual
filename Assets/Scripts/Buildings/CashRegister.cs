@@ -6,6 +6,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 
+[RequireComponent(typeof(Cash))]
 public class CashRegister : MonoBehaviour
 {
     public class Queue
@@ -41,14 +42,10 @@ public class CashRegister : MonoBehaviour
     
     [SerializeField] private Box _boxPrefab;
     [SerializeField] private Transform _boxPosition;
-    [SerializeField] private GameObject _cashPrefab;
-    [SerializeField] private Transform _cashPosition;
-    [SerializeField] private List<Transform> _AIPositions = new List<Transform>();
+    [SerializeField] private List<Transform> _AIPositions = new ();
 
     private List<Queue> _queues = new List<Queue>();
-    private Transform _startPositionCash;
-    private int _cashAmount;
-    private int _productCost = 3;
+    private Cash _cash;
     private bool _isHaveCashier;
     private bool _isHavePlayer;
 
@@ -58,8 +55,8 @@ public class CashRegister : MonoBehaviour
     private void Awake()
     {
         Initialize();
-        
-        _startPositionCash = _cashPosition;
+
+        _cash = GetComponent<Cash>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -68,8 +65,10 @@ public class CashRegister : MonoBehaviour
         {
             _isHavePlayer = true;
             
-            WithdrawCash(player); 
-            Serve();
+            _cash.WithdrawCash(player); 
+            
+            if(!_isHaveCashier)
+                Serve();
         }
         
         if (other.TryGetComponent(out Cashier AI))
@@ -97,8 +96,8 @@ public class CashRegister : MonoBehaviour
             Queue queue = _queues.FirstOrDefault();
             if ((queue.AI != null) && (queue.OnSpot) && (queue.AI.ResourcesInHands.Count > 0))
             {
-                Box box = InstantiateBox();
-                StartCoroutine(MoveResourcesToBox(queue, box));
+                //Box box = InstantiateBox();
+                InstantiateBox(queue);
             }
         }
     }
@@ -123,10 +122,13 @@ public class CashRegister : MonoBehaviour
     private IEnumerator MoveResourcesToBox(Queue queue, Box box)
     {
         int index = 0;
-        int cash = queue.AI.ResourcesInHands.Count * _productCost;
+        int cash = queue.AI.ResourcesInHands.Count * _cash.ProductCost;
         float duration = 0.4f;
         
         queue.SetOnSpot(false);
+
+        // ÎØÈÁÊÀ 
+        // InvalidOperationException: Sequence contains no elements
         GameObject lastResource = queue.AI.ResourcesInHands.Last().gameObject;
             
         foreach (GameObject resource in queue.AI.ResourcesInHands.ToList())
@@ -143,10 +145,8 @@ public class CashRegister : MonoBehaviour
             {
                 resource.transform.DOLocalJump(box.Positions[index].localPosition, 250, 1, duration).OnComplete(() =>
                 {
-                    MoveBoxToHands(box, queue.AI, queue.AI.MoveTowardsExit);
+                    MoveBoxToHands(box, queue.AI, queue.AI.MoveTowardsExit, cash);
                 });
-
-                AddCash(cash);
                 yield break;
             }
             else
@@ -175,11 +175,11 @@ public class CashRegister : MonoBehaviour
         }
     }
 
-    private void MoveBoxToHands(Box box, AIController AI, Action moveTowardsExit)
+    private void MoveBoxToHands(Box box, AIController AI, Action moveTowardsExit, int cash)
     {
         float duration = 0.4f;
-
         AI.ResourcesInHands.Add(box.gameObject);
+        AI.Move();
 
         box.transform.SetParent(AI.Hands.transform);
         box.transform.DOLocalRotate(new Vector3(0, 90, 0), duration);
@@ -187,53 +187,59 @@ public class CashRegister : MonoBehaviour
         {
             moveTowardsExit.Invoke();
             AI.AIManager.RemoveAIFromQueue(AI);
+            _cash.AddCashOnCashRegister(AI.transform, cash);
             NextBuyer();
         });
     }
 
-    private Box InstantiateBox()
+    private void InstantiateBox(Queue queue)
     {
 
-        /*Box box = Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity);
+        Box box = Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity);
         Vector3 endScale = box.transform.localScale;
         box.transform.localScale = Vector3.zero;
-        box.transform.DOScale(endScale, 0.5f);*/
-
-        return Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity);
-    }
-
-
-    private void AddCash(int cash)
-    {
-        var indexPosition = _cashAmount == 0 ? 0 : _cashAmount / _productCost;
-        _cashAmount += cash;
-
-        for (int i = 0; i < cash / _productCost; i++)
+        box.transform.DOScale(endScale, 0.5f).OnComplete(() =>
         {
-            var positionY = 0;
-            for (int j = 0; j < indexPosition * 9; j += 9)
+            StartCoroutine(MoveResourcesToBox(queue, box));
+        });
+
+        /*return Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity);*/
+    }
+    
+/*    private void AddCash(int cash)
+    {
+        var count = cash / _productCost;
+
+        for (int i = 0; i < count; i++)
+        {
+            if (_cashPositon >= _cashPositions.Count)
             {
-                if (j < j + 9)
+                _cashPositon = 0;
+                for (int j = 0; j < 116; j += 12)
                 {
-                    positionY = j;
-                    break;
+                    if (cash <= j + 12)
+                    {
+                        var positionLevel = j / 12;
+                        foreach (Transform position in _cashPositions)
+                        {
+                            position.position += Vector3.up * ((positionLevel == 0) ? 1 : positionLevel) * 0.25f;
+                        }
+
+                        break;
+                    }
                 }
             }
-            
-            if ((indexPosition + i) % 3 == 0)
-            {
-                _cashPosition.localPosition += new Vector3(0.55f, 0, -_startPositionCash.localPosition.z);
-            }
 
-            Instantiate(_cashPrefab, _cashPosition.position, Quaternion.identity);
-
-            _cashPosition.localPosition += new Vector3(0, 0, -0.35f);
+            Instantiate(_cashPrefab, _cashPositions[_cashPositon].position, Quaternion.identity);
+            _cashPositon++;
         }
+        
+        _cashAmount += cash;
     }
 
     private void WithdrawCash(Player player)
     {
         player.CashData.AddCash(_cashAmount);
         _cashAmount = 0;
-    }
+    }*/
 }

@@ -35,7 +35,7 @@ public class TrashCan : MonoBehaviour
         {
             if (_isEntry)
             {
-                player.ResourcesInHands.Remove(resource);
+                player.RemoveResourceOnHands(resource);
                 resource.Obj.transform.DOMove(transform.position, _duration);
                 Destroy(resource.Obj, _duration);
             }

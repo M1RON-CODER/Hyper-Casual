@@ -7,7 +7,7 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(NavMeshAgent))]
-public class BotController : MonoBehaviour
+public class AIController : MonoBehaviour
 {
     private class TargetParams
     {
@@ -35,7 +35,7 @@ public class BotController : MonoBehaviour
     }
 
     [SerializeField] private GameObject _hands;
-    [SerializeField] private BotBar _botBar;
+    [SerializeField] private AIBar _AIBar;
 
     private List<TargetParams> _targets = new List<TargetParams>();
     private List<GameObject> _resourcesInHands = new List<GameObject>();
@@ -43,14 +43,14 @@ public class BotController : MonoBehaviour
     private NavMeshAgent _agent;
     private Animator _animator;
     private CashRegister _cashRegister;
-    private BotManager _botManager;
+    private AIManager _AIManager;
     private Transform _exitPoint; 
     private string _currentAnimation = Keys.Idle;
 
     public GameObject Hands => _hands;
     public List<GameObject> ResourcesInHands => _resourcesInHands;
     public NavMeshAgent Agent => _agent;
-    public BotManager Manager => _botManager;
+    public AIManager AIManager => _AIManager;
 
     #region MonoBehaviour
     private void Awake()
@@ -60,9 +60,9 @@ public class BotController : MonoBehaviour
     }
     #endregion
 
-    public void Initialize(BotManager botManager, CashRegister cashRegister, Transform exitPoint)
+    public void Initialize(AIManager AIManager, CashRegister cashRegister, Transform exitPoint)
     {
-        _botManager = botManager;
+        _AIManager = AIManager;
         _cashRegister = cashRegister;
         _exitPoint = exitPoint;
     }
@@ -105,11 +105,11 @@ public class BotController : MonoBehaviour
         resource.transform.SetParent(_hands.transform);
         resource.transform.DOLocalMove(new Vector3(0, resourcePositionY, 0), 0.2f);
         
-        _resourcesInHands.Add(resource);
+        _resourcesInHands.Insert(0, resource);
 
         target.CurrentResourcePlusOne();
 
-        _botBar.UpdateData(target.CurrentCountResources, target.TotalCountResources);
+        _AIBar.RefreshData(target.CurrentCountResources, target.TotalCountResources);
 
         Stop();
 
@@ -120,6 +120,8 @@ public class BotController : MonoBehaviour
     {
         resource.transform.SetParent(null);
         _resourcesInHands.Remove(resource);
+
+        SettingAnimation();
     }
 
     public void MovePosition(Transform point)
@@ -132,7 +134,12 @@ public class BotController : MonoBehaviour
     // Ошибка 
     public void NextTarget()
     {
-        // При удаление первого элемента в списке происходит ошибка
+        if (_targets.Count == 0) 
+        {
+            return;
+        }
+        
+        // При удаление первого элемента в списке происходит ошибка   
         _targets.Remove(_targets.First());
         if(_targets.Count == 0)
         {
@@ -147,6 +154,7 @@ public class BotController : MonoBehaviour
     public void MoveTowardsExit()
     {
         Move();
+        _AIBar.Hide();
         _agent.destination = _exitPoint.position;
         StartCoroutine(CheckDistanceForDestroy());
     }
@@ -158,7 +166,7 @@ public class BotController : MonoBehaviour
         
         Move();
 
-        _botBar.SetData(target.Resource, target.CurrentCountResources, target.TotalCountResources);
+        _AIBar.SetData(target.Resource, target.CurrentCountResources, target.TotalCountResources);
     }
 
     private void MoveToCashRegister()
@@ -173,6 +181,7 @@ public class BotController : MonoBehaviour
         StartCoroutine(CheckDistanceStop());
 
         Move();
+        _AIBar.SetData(Building.Buildings.CashRegister);
     }
 
     private IEnumerator CheckDistanceStop()
@@ -191,6 +200,7 @@ public class BotController : MonoBehaviour
 
                 if(index == 0)
                 {
+                    _cashRegister.Queues[index].SetOnSpot(true);
                     _cashRegister.Serve();
                 }
 
@@ -206,7 +216,7 @@ public class BotController : MonoBehaviour
             yield return new WaitForSeconds(1f);
             if (_agent.remainingDistance <= 1f)
             {
-                _botManager.DestroyBot(this);
+                _AIManager.DestroyAI(this);
                 yield break;
             }
         }
