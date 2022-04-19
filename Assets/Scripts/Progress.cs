@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,34 +6,43 @@ using UnityEngine;
 
 public class Progress : MonoBehaviour
 {
-    //[SerializeField] private EmployeeManager _employeeManager;
-    [SerializeField] private BuildingsManager _buildingsManager;
-
-    private List<List<MyClass>> _progress;
+    [SerializeField] private List<SpawnerEmployee> _employees;
     private int _progressIndex;
-    private int _underProgressIndex;
 
+    public int ProgressIndex => _progressIndex;
+    
     #region MonoBehaviour
     private void Awake()
     {
-        _progress = new List<List<MyClass>>()
-        {
-            new List<MyClass>()
-            {
-                //new MyClass(){ Obj = _employeeManager.Cashier.gameObject, Cost = 100 },
-            },
-        };
-
         _progressIndex = PlayerPrefs.GetInt(Keys.ProgressIndex, 0);
-        _underProgressIndex = PlayerPrefs.GetInt(Keys.UnderProgressIndex, 0);
+
+        ActiveOpenObject();
     }
     #endregion
-}
 
-class MyClass
-{
-    public GameObject Obj { get; set; }
-    public Sprites Sprites { get; set; }
-    public int Cost { get; set; }
+    public void IncreaseProgress()
+    {
+        _progressIndex++;
+        PlayerPrefs.SetInt(Keys.ProgressIndex, _progressIndex);
+    }
+
+    private void ActiveOpenObject()
+    {
+        for (int i = 0; i < _progressIndex; i++)
+        {
+            _employees[i].Active();
+        }
+
+        ShowNextObject();
+    }
+
+    private void ShowNextObject()
+    {
+        if (_progressIndex < _employees.Count)
+        {
+            _employees[_progressIndex].Initialize(this);
+            _employees[_progressIndex].gameObject.SetActive(true);
+        }
+    }
 }
 

@@ -73,7 +73,7 @@ public class CashRegister : MonoBehaviour
         
         if (other.TryGetComponent(out Cashier AI))
         {
-            _isHavePlayer = true;
+            // _isHavePlayer = true;
             _isHaveCashier = true;
             
             Serve();
@@ -91,7 +91,7 @@ public class CashRegister : MonoBehaviour
 
     public void Serve()
     {
-        if (_isHavePlayer)
+        if (_isHavePlayer || _isHaveCashier)
         {
             Queue queue = _queues.FirstOrDefault();
             if ((queue.AI != null) && (queue.OnSpot) && (queue.AI.ResourcesInHands.Count > 0))
@@ -127,7 +127,7 @@ public class CashRegister : MonoBehaviour
         
         queue.SetOnSpot(false);
 
-        // Œÿ»¡ ¿ 
+        // –û–®–ò–ë–ö–ê
         // InvalidOperationException: Sequence contains no elements
         GameObject lastResource = queue.AI.ResourcesInHands.Last().gameObject;
             
@@ -202,44 +202,5 @@ public class CashRegister : MonoBehaviour
         {
             StartCoroutine(MoveResourcesToBox(queue, box));
         });
-
-        /*return Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity);*/
     }
-    
-/*    private void AddCash(int cash)
-    {
-        var count = cash / _productCost;
-
-        for (int i = 0; i < count; i++)
-        {
-            if (_cashPositon >= _cashPositions.Count)
-            {
-                _cashPositon = 0;
-                for (int j = 0; j < 116; j += 12)
-                {
-                    if (cash <= j + 12)
-                    {
-                        var positionLevel = j / 12;
-                        foreach (Transform position in _cashPositions)
-                        {
-                            position.position += Vector3.up * ((positionLevel == 0) ? 1 : positionLevel) * 0.25f;
-                        }
-
-                        break;
-                    }
-                }
-            }
-
-            Instantiate(_cashPrefab, _cashPositions[_cashPositon].position, Quaternion.identity);
-            _cashPositon++;
-        }
-        
-        _cashAmount += cash;
-    }
-
-    private void WithdrawCash(Player player)
-    {
-        player.CashData.AddCash(_cashAmount);
-        _cashAmount = 0;
-    }*/
 }
