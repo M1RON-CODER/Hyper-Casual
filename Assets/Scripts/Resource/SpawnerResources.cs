@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class ResourcesController : Resource
+public class SpawnerResources: Resource
 {
-    [SerializeField] private List<Transform> _positionResources = new List<Transform>();
-    [SerializeField] private GameObject _objResource;
+    [SerializeField] private List<Transform> _resourcePositions = new();
+    [SerializeField] private GameObject _resourcePrefab;
     [SerializeField] private float _delayInstatiateResources;
-    [SerializeField] private float _easing = 0.3f;
+    [Min(0.3f)] [SerializeField] private float _easing = 0.3f;
 
-    private List<GameObject> _resources = new List<GameObject>();
+    private List<GameObject> _resources = new();
     private PlayerController _playerController;
     private bool _isPlayerEnter;
 
@@ -28,7 +28,9 @@ public class ResourcesController : Resource
             _isPlayerEnter = true;
 
             if(_resources.Count > 0)
+            {
                 TakeResource();
+            }
         }
     }
 
@@ -40,23 +42,6 @@ public class ResourcesController : Resource
         }
     }
     #endregion
-    /*    private IEnumerator TakeResource()
-        {
-            for(int i = 0; i < _resources.Count;)
-            {
-                if (_playerController.AddResourcesOnHands(CurrentResource, _resources[i]))
-                {
-                    Invoke(nameof(InstantiateResources), _delayInstatiateResources);
-                    yield break;
-                }
-
-                _resources.RemoveAt(i);
-
-                yield return new WaitForSeconds(0.05f);
-            }
-
-            Invoke(nameof(InstantiateResources), _delayInstatiateResources);
-        }*/
 
     private void TakeResource()
     {
@@ -64,7 +49,6 @@ public class ResourcesController : Resource
         {
             if (_playerController.AddResourcesOnHands(CurrentResource, resource))
             {
-                Invoke(nameof(InstantiateResources), _delayInstatiateResources);
                 return;
             }
 
@@ -87,16 +71,16 @@ public class ResourcesController : Resource
 
     private void InstantiateResources()
     {
-        int count = _positionResources.Count - _resources.Count;
+        int count = _resourcePositions.Count - _resources.Count;
 
         for (int i = 0; i < count; i++)
         {
-            GameObject resource = Instantiate(_objResource, _positionResources[i]);
+            GameObject resource = Instantiate(_resourcePrefab, _resourcePositions[i]);
             resource.name = i.ToString();
-            _resources.Insert(i, resource);
+            _resources.Insert(0, resource);
 
             Vector3 endScale = resource.transform.localScale;
-            resource.transform.localScale *= 0;
+            resource.transform.localScale = Vector3.zero;
             StartCoroutine(ChangeOfScale(resource, endScale, _easing));
         }
 

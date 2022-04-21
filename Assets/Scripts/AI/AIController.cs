@@ -3,11 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.AI;
 
-[RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(NavMeshAgent))]
-public class AIController : MonoBehaviour
+public class AIController : AI
 {
     private class TargetParams
     {
@@ -34,53 +31,35 @@ public class AIController : MonoBehaviour
         }
     }
 
-    [SerializeField] private GameObject _hands;
-    [SerializeField] private AIBar _AIBar;
-
-    private List<TargetParams> _targets = new List<TargetParams>();
-    private List<GameObject> _resourcesInHands = new List<GameObject>();
-
-    private NavMeshAgent _agent;
-    private Animator _animator;
+    private List<TargetParams> _targets = new();
     private CashRegister _cashRegister;
     private AIManager _AIManager;
-    private Transform _exitPoint; 
+    private Transform _exitPoint;
     private string _currentAnimation = Keys.Idle;
 
-    public GameObject Hands => _hands;
-    public List<GameObject> ResourcesInHands => _resourcesInHands;
-    public NavMeshAgent Agent => _agent;
     public AIManager AIManager => _AIManager;
-
-    #region MonoBehaviour
-    private void Awake()
-    {
-        _agent = GetComponent<NavMeshAgent>();
-        _animator = GetComponent<Animator>();
-    }
-    #endregion
 
     public void Initialize(AIManager AIManager, CashRegister cashRegister, Transform exitPoint)
     {
-        _AIManager = AIManager;
-        _cashRegister = cashRegister;
-        _exitPoint = exitPoint;
+        _AIManager = AIManager ?? throw new System.ArgumentNullException(nameof(AIManager));
+        _cashRegister = cashRegister ?? throw new System.ArgumentNullException(nameof(cashRegister));
+        _exitPoint = exitPoint ?? throw new System.ArgumentNullException(nameof(exitPoint));
     }
 
-    public void Move()
+    public override void Move()
     {
-        _agent.isStopped = false;
+        base.Move();
 
-        SettingAnimation();
-        _animator.SetBool(_currentAnimation, true);
+        AnimationAdjustment();
+        Animator.SetBool(_currentAnimation, true);
     }
 
-    public void Stop()
+    public override void Stop()
     {
-        _agent.isStopped = true;
+        base.Stop();
 
-        SettingAnimation();
-        _animator.SetBool(_currentAnimation, false);
+        AnimationAdjustment();
+        Animator.SetBool(_currentAnimation, false);
     }
 
     public void SetTargets(List<GameObject> waypoints)
@@ -95,52 +74,42 @@ public class AIController : MonoBehaviour
 
     public bool AddResourceToHands(GameObject resource)
     {
+        AnimationAdjustment();
+        
         TargetParams target = _targets.FirstOrDefault();
         if ((target == null) || (target.CurrentCountResources >= target.TotalCountResources))
         {
+            NextTarget();
             return true;
         }
 
-        float resourcePositionY = _resourcesInHands.Count == 0 ? 0 : _resourcesInHands.Count * resource.transform.localScale.y;
-        resource.transform.SetParent(_hands.transform);
-        resource.transform.DOLocalMove(new Vector3(0, resourcePositionY, 0), 0.2f);
-        
-        _resourcesInHands.Insert(0, resource);
+        Vector3 position = GetPositionForResourceOnHands();
+        resource.transform.DOLocalMove(position, 0.2f);
+        ResourcesOnHands.Insert(0, resource);
+
+        AIBar.RefreshData(target.CurrentCountResources, target.TotalCountResources);
 
         target.CurrentResourcePlusOne();
-
-        _AIBar.RefreshData(target.CurrentCountResources, target.TotalCountResources);
-
-        Stop();
 
         return target.CurrentCountResources >= target.TotalCountResources;
     }
 
-    public void RemoveResourceInHands(GameObject resource)
+    public void RemoveResourceFromHands(GameObject resource)
     {
         resource.transform.SetParent(null);
-        _resourcesInHands.Remove(resource);
+        ResourcesOnHands.Remove(resource);
 
-        SettingAnimation();
+        AnimationAdjustment();
     }
-
-    public void MovePosition(Transform point)
-    {        
-        _agent.destination = point.position;
-        Move();
-        StartCoroutine(CheckDistanceStop());
-    }
-   
-    // Ошибка 
+    
     public void NextTarget()
     {
         if (_targets.Count == 0) 
         {
-            return;
+            throw new System.Exception("No targets");
         }
-        
-        // При удаление первого элемента в списке происходит ошибка   
-        _targets.Remove(_targets.First());
+
+        _targets.Remove(_targets.FirstOrDefault());
         if(_targets.Count == 0)
         {
             MoveToCashRegister();
@@ -151,53 +120,67 @@ public class AIController : MonoBehaviour
         }
     }
 
+    public void MovePosition(Transform point)
+    {        
+        Agent.destination = point.position;
+        Move();
+        StartCoroutine(StopDistanceCheck());
+    }
+   
+
     public void MoveTowardsExit()
     {
-        Move();
-        _AIBar.Hide();
-        _agent.destination = _exitPoint.position;
-        StartCoroutine(CheckDistanceForDestroy());
+        MovePosition(_exitPoint);
+        AIBar.Hide();
     }
 
     private void MoveWaypoint()
     {
         TargetParams target = _targets.First();
-        _agent.destination = target.Waypoint.position;
-        
+        Agent.destination = target.Waypoint.position;
         Move();
-
-        _AIBar.SetData(target.Resource, target.CurrentCountResources, target.TotalCountResources);
+        
+        AIBar.SetData(target.Resource, target.CurrentCountResources, target.TotalCountResources);
     }
 
     private void MoveToCashRegister()
     {
-        // Debug.Log($"{this.name} MoveToCashRegister");
         int index = _cashRegister.UnoccupiedPlace();
         CashRegister.Queue queue = _cashRegister.Queues[index];
         queue.SetBusyPlace(this);
-
-        _agent.destination = queue.Position.position;
-
-        StartCoroutine(CheckDistanceStop());
-
-        Move();
-        _AIBar.SetData(Building.Buildings.CashRegister);
+        
+        MovePosition(queue.Position);
+        AIBar.SetData(Building.Buildings.CashRegister);
     }
 
-    private IEnumerator CheckDistanceStop()
+    private Vector3 GetPositionForResourceOnHands()
     {
-        // Debug.Log($"{this.name} Check Distance Stop");
+        if (ResourcesOnHands.Count == 0)
+        {
+            return Vector3.zero;
+        }
+
+        Vector3 position = Vector3.zero;
+
+        foreach (GameObject resource in ResourcesOnHands)
+        {
+            position.y += resource.transform.localScale.x;
+        }
+
+        return position;
+    }
+
+    private IEnumerator StopDistanceCheck()
+    {
         while (true)
         {
             yield return new WaitForSeconds(0.3f);
             
-            if (_agent.remainingDistance <= 0.1f)
+            if (Agent.remainingDistance <= 0.1f)
             {
-                // Debug.Log($"{this.name} is stoped");
                 Stop();
 
                 int index = _cashRegister.CurrentIndex(this);
-
                 if(index == 0)
                 {
                     _cashRegister.Queues[index].SetOnSpot(true);
@@ -214,7 +197,7 @@ public class AIController : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(1f);
-            if (_agent.remainingDistance <= 1f)
+            if (Agent.remainingDistance <= 1f)
             {
                 _AIManager.DestroyAI(this);
                 yield break;
@@ -222,28 +205,27 @@ public class AIController : MonoBehaviour
         }
     }
 
-    private void SettingAnimation()
+    private void AnimationAdjustment()
     {
-        if (_resourcesInHands.Count > 0)
+        if (ResourcesOnHands.Count > 0)
         {
-            _animator.SetBool(Keys.CarryingIdle, true);
-            _animator.SetBool(Keys.CarryingWalking, true);
+            Animator.SetBool(Keys.CarryingIdle, true);
+            Animator.SetBool(Keys.CarryingWalking, true);
 
-            _animator.SetBool(Keys.Idle, false);
-            _animator.SetBool(Keys.Walking, false);
+            Animator.SetBool(Keys.Idle, false);
+            Animator.SetBool(Keys.Walking, false);
 
             _currentAnimation = Keys.CarryingWalking;
         }
         else
         {
-            _animator.SetBool(Keys.Idle, true);
-            _animator.SetBool(Keys.Walking, true);
+            Animator.SetBool(Keys.Idle, true);
+            Animator.SetBool(Keys.Walking, true);
 
-            _animator.SetBool(Keys.CarryingIdle, false);
-            _animator.SetBool(Keys.CarryingWalking, false);
+            Animator.SetBool(Keys.CarryingIdle, false);
+            Animator.SetBool(Keys.CarryingWalking, false);
 
             _currentAnimation = Keys.Walking;
         }
     }
-
 }

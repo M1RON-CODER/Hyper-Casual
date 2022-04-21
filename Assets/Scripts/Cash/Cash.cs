@@ -80,7 +80,6 @@ public class Cash : MonoBehaviour
             });
         }
 
-
         player.CashData.AddCash(_cashAmount);
 
         _cashPositions = _startPostions;

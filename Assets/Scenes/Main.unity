@@ -1230,9 +1230,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c233510494c85e4f82298804ced8056, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _playerObject: {fileID: 0}
+  _handsPosition: {fileID: 0}
   _cashData: {fileID: 1862977341}
-  _playerObj: {fileID: 7518595721921669598}
-  _hands: {fileID: 446133572}
   _joystick: {fileID: 8135886326603350232}
   _speed: 8
 --- !u!4 &323021223
@@ -3760,15 +3760,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _resource: 0
-  _positions:
-  - {fileID: 971051766}
-  - {fileID: 822007731}
-  - {fileID: 748210005}
-  - {fileID: 1026256664}
-  - {fileID: 2021539086}
-  - {fileID: 696692619}
-  - {fileID: 2139997692}
-  - {fileID: 905842137}
+  _resourcePositions: []
 --- !u!1 &1155981482
 GameObject:
   m_ObjectHideFlags: 0
@@ -5884,7 +5876,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1573036937}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.41, y: 14.37, z: -10.16}
+  m_LocalPosition: {x: 4.6, y: 14.37, z: -10.16}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5954,17 +5946,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2901e70a4da9a1f4c9204bcbe97605e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _resource: 0
-  _positionResources:
-  - {fileID: 1282460672}
-  - {fileID: 401385660}
-  - {fileID: 1306610084}
-  - {fileID: 1396218073}
-  - {fileID: 115827501}
-  _objResource: {fileID: 1858853241236989394, guid: f948ab4d83c5f494e9be2cacc3482395,
-    type: 3}
-  _delayInstatiateResources: 1
-  _easing: 0.3
 --- !u!65 &1578620108
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -8908,12 +8889,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _resource: 0
-  _positionResources:
-  - {fileID: 506493599}
-  - {fileID: 706726457}
-  - {fileID: 1352360996}
-  _objResource: {fileID: 5089486288615743332, guid: fce0e533a6743294e830cbe4355ff69d,
-    type: 3}
+  _resourcePositions: []
+  _resourcePrefab: {fileID: 0}
   _delayInstatiateResources: 3
   _easing: 0.3
 --- !u!65 &3469287838242249130
@@ -10282,15 +10259,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2901e70a4da9a1f4c9204bcbe97605e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _resource: 1
-  _positionResources:
-  - {fileID: 1908312060}
-  - {fileID: 2132662439}
-  - {fileID: 1984629367}
-  _objResource: {fileID: 6630585023318449269, guid: df1b8424f1fcfdd48b5f433adb48fba8,
-    type: 3}
-  _delayInstatiateResources: 1
-  _easing: 0.3
 --- !u!65 &7651556832975868524
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -11053,7 +11021,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 4144db8fcd4e5dc46b3dedadb2dd759f, type: 2}
+  - {fileID: 2100000, guid: 534381d665c23b4409f8cc3526f15beb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

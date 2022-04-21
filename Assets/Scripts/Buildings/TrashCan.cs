@@ -31,11 +31,11 @@ public class TrashCan : MonoBehaviour
 
     private IEnumerator RemoveResourcesInHands(PlayerController player)
     {
-        foreach (Resource.ResourceParams resource in player.ResourcesInHands.ToList())
+        foreach (Resource.ResourceParams resource in player.ResourcesOnHands.ToList())
         {
             if (_isEntry)
             {
-                player.RemoveResourceOnHands(resource);
+                player.RemoveResourceFromHands(resource);
                 resource.Obj.transform.DOMove(transform.position, _duration);
                 Destroy(resource.Obj, _duration);
             }

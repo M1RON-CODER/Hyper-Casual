@@ -26,7 +26,7 @@ public class CashRegister : MonoBehaviour
         public Transform Position => _position;
         public AIController AI => _AI;
         public bool IsBusyPlace => _isBusyPlace;
-        public bool OnSpot => _onSpot;
+        public bool OnSpot => _onSpot; 
 
         public void SetBusyPlace(AIController AI)
         {
@@ -42,9 +42,9 @@ public class CashRegister : MonoBehaviour
     
     [SerializeField] private Box _boxPrefab;
     [SerializeField] private Transform _boxPosition;
-    [SerializeField] private List<Transform> _AIPositions = new ();
+    [SerializeField] private List<Transform> _AIPositions = new();
 
-    private List<Queue> _queues = new List<Queue>();
+    private List<Queue> _queues = new();
     private Cash _cash;
     private bool _isHaveCashier;
     private bool _isHavePlayer;
@@ -94,10 +94,16 @@ public class CashRegister : MonoBehaviour
         if (_isHavePlayer || _isHaveCashier)
         {
             Queue queue = _queues.FirstOrDefault();
-            if ((queue.AI != null) && (queue.OnSpot) && (queue.AI.ResourcesInHands.Count > 0))
+            Sequence sequence = DOTween.Sequence();
+            if ((queue.AI != null) && queue.OnSpot)
             {
-                //Box box = InstantiateBox();
-                InstantiateBox(queue);
+                Box box = InstantiateBox(queue);
+                sequence
+                    .OnComplete(() => 
+                    { 
+                        MoveResourcesToBox(queue, box); 
+                    })
+                    .SetDelay(0.5f);
             }
         }
     }
@@ -119,45 +125,40 @@ public class CashRegister : MonoBehaviour
             _queues.Add(new Queue(_AIPositions[i]));
         }
     }
-    private IEnumerator MoveResourcesToBox(Queue queue, Box box)
+
+    private void MoveResourcesToBox(Queue queue, Box box)
     {
-        int index = 0;
-        int cash = queue.AI.ResourcesInHands.Count * _cash.ProductCost;
+        Sequence sequence = DOTween.Sequence();
+        int indexPosition = 0;
+        int cash = queue.AI.ResourcesOnHands.Count * _cash.ProductCost;
         float duration = 0.4f;
-        
-        queue.SetOnSpot(false);
 
-        // ОШИБКА
-        // InvalidOperationException: Sequence contains no elements
-        GameObject lastResource = queue.AI.ResourcesInHands.Last().gameObject;
-            
-        foreach (GameObject resource in queue.AI.ResourcesInHands.ToList())
+        foreach (GameObject resource in queue.AI.ResourcesOnHands.ToList())
         {
-            if (index >= box.Positions.Count - 1)
+            if (indexPosition >= box.Positions.Count - 1)
             {
-                index = 0;
+                indexPosition = 0;
             }
 
-            queue.AI.ResourcesInHands.Remove(resource);
+            queue.AI.RemoveResourceFromHands(resource);
             resource.transform.SetParent(box.transform);
+            sequence.Append(resource.transform.DOLocalJump(box.Positions[indexPosition].localPosition, 250, 1, duration));
 
-            if (resource.Equals(lastResource))
-            {
-                resource.transform.DOLocalJump(box.Positions[index].localPosition, 250, 1, duration).OnComplete(() =>
-                {
-                    MoveBoxToHands(box, queue.AI, queue.AI.MoveTowardsExit, cash);
-                });
-                yield break;
-            }
-            else
-            {
-                resource.transform.DOLocalJump(box.Positions[index].localPosition, 250, 1, duration);
-            }
-
-            index++;
-
-            yield return new WaitForSeconds(duration);
+            indexPosition++;
         }
+
+        sequence.OnComplete(() =>
+        {
+            Sequence sequence = DOTween.Sequence();
+            sequence.Append(MoveBoxToHands(box, queue.AI));
+            sequence.OnComplete(() =>
+            {
+                queue.AI.AIManager.RemoveAIFromQueue(queue.AI);
+                _cash.AddCashOnCashRegister(queue.AI.transform, cash);
+                queue.AI.MoveTowardsExit();
+                NextBuyer();
+            });
+        });
     }
 
     private void NextBuyer()
@@ -175,32 +176,25 @@ public class CashRegister : MonoBehaviour
         }
     }
 
-    private void MoveBoxToHands(Box box, AIController AI, Action moveTowardsExit, int cash)
+    private Tween MoveBoxToHands(Box box, AIController AI)
     {
         float duration = 0.4f;
-        AI.ResourcesInHands.Add(box.gameObject);
-        AI.Move();
-
-        box.transform.SetParent(AI.Hands.transform);
+        
+        AI.AddResourceToHands(box.gameObject);
+        box.transform.SetParent(AI.Hands);
         box.transform.DOLocalRotate(new Vector3(0, 90, 0), duration);
-        box.transform.DOLocalMove(Vector3.zero, duration).OnComplete(() => 
-        {
-            moveTowardsExit.Invoke();
-            AI.AIManager.RemoveAIFromQueue(AI);
-            _cash.AddCashOnCashRegister(AI.transform, cash);
-            NextBuyer();
-        });
+
+        return box.transform.DOLocalMove(Vector3.zero, duration);
     }
 
-    private void InstantiateBox(Queue queue)
+    private Box InstantiateBox(Queue queue)
     {
 
         Box box = Instantiate(_boxPrefab, _boxPosition.position, Quaternion.identity);
         Vector3 endScale = box.transform.localScale;
         box.transform.localScale = Vector3.zero;
-        box.transform.DOScale(endScale, 0.5f).OnComplete(() =>
-        {
-            StartCoroutine(MoveResourcesToBox(queue, box));
-        });
+        box.transform.DOScale(endScale, 0.5f);
+
+        return box;
     }
 }

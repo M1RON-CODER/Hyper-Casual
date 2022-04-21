@@ -3,84 +3,73 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(Animator))]
 public class PlayerController : Player
 {
     [SerializeField] private DynamicJoystick _joystick;
     [SerializeField] private int _speed;
 
-    private Animator _animator;
-    private Rigidbody _rigidbody;
     private string _currentAnimation = Keys.Running;
 
-    public string CurrentAnimation => _currentAnimation;
-
     #region MonoBehaviour
-    private void Start()
-    {
-        _rigidbody = GetComponent<Rigidbody>();
-        _animator = GetComponent<Animator>();   
-    }
 
     public void FixedUpdate()
     {
-        _animator.SetBool(_currentAnimation, _joystick.IsTouch);
+        Animator.SetBool(_currentAnimation, _joystick.IsTouch);
 
         Vector3 direction = Vector3.forward * _joystick.Vertical + Vector3.right * _joystick.Horizontal;
 
-        _rigidbody.MovePosition(transform.position + direction * _speed * Time.deltaTime);
+        Rigidbody.MovePosition(transform.position + direction * _speed * Time.deltaTime);
 
         if(direction != Vector3.zero)
         {
-            Vector3 relativePos = PlayerObj.transform.position;
+            Vector3 relativePos = PlayerObject.transform.position;
             relativePos.Set(_joystick.Horizontal, 0, _joystick.Vertical);
-            PlayerObj.transform.rotation = Quaternion.LookRotation(relativePos);
+            PlayerObject.transform.rotation = Quaternion.LookRotation(relativePos);
         }
     }
     #endregion
 
-    public bool AddResourcesOnHands(Resource.Resources resource, GameObject obj)
+    public bool AddResourcesOnHands(Resource.Resources resource, GameObject resourceObj)
     {
-        if (ResourcesInHands.Count >= MaxCountOnHands)
+        AnimationAdjustment();
+
+        if (ResourcesOnHands.Count >= MaxCountOnHands)
         {
             return true;
         }
         
-        Vector3 position = GetPositionForResourceInHands();
-        obj.transform.SetParent(Hands.transform);
-        obj.transform.DOLocalMove(position, 0.2f);
+        Vector3 position = GetPositionForResourceOnHands();
+        resourceObj.transform.SetParent(Hands.transform);
+        resourceObj.transform.DOLocalMove(position, 0.2f);
 
-        ResourcesInHands.Insert(0, (new Resource.ResourceParams { Obj = obj, Resource = resource }));
-
-        SettingsAnimation();
+        ResourcesOnHands.Insert(0, (new Resource.ResourceParams { Obj = resourceObj, Resource = resource }));
 
         return false;
     }
     
-    public void RemoveResourceOnHands(Resource.ResourceParams resource)
+    public void RemoveResourceFromHands(Resource.ResourceParams resource)
     {
-        if (ResourcesInHands.Count == 0)
+        if (ResourcesOnHands.Count == 0)
         {
             return;
         }
         
         resource.Obj.transform.SetParent(null);
-        ResourcesInHands.Remove(resource);
+        ResourcesOnHands.Remove(resource);
 
-        SettingsAnimation();
+        AnimationAdjustment();
     }
 
-    private Vector3 GetPositionForResourceInHands()
+    private Vector3 GetPositionForResourceOnHands()
     {
-        if (ResourcesInHands.Count == 0)
+        if (ResourcesOnHands.Count == 0)
         {
             return Vector3.zero;
         }
 
         Vector3 position = Vector3.zero;
         
-        foreach (Resource.ResourceParams resource in ResourcesInHands)
+        foreach (Resource.ResourceParams resource in ResourcesOnHands)
         {
             position.y += resource.Obj.transform.localScale.x;
         }
@@ -88,25 +77,25 @@ public class PlayerController : Player
         return position;    
     }
 
-    private void SettingsAnimation()
+    private void AnimationAdjustment()
     {
-        if (ResourcesInHands.Count > 0)
+        if (ResourcesOnHands.Count > 0)
         {
-            _animator.SetBool(Keys.CarryingIdle, true);
-            _animator.SetBool(Keys.CarryingRunning, true);
+            Animator.SetBool(Keys.CarryingIdle, true);
+            Animator.SetBool(Keys.CarryingRunning, true);
 
-            _animator.SetBool(Keys.Idle, false);
-            _animator.SetBool(Keys.Running, false);
+            Animator.SetBool(Keys.Idle, false);
+            Animator.SetBool(Keys.Running, false);
 
             _currentAnimation = Keys.CarryingRunning;
         }
         else
         {
-            _animator.SetBool(Keys.Idle, true);
-            _animator.SetBool(Keys.Running, true);
+            Animator.SetBool(Keys.Idle, true);
+            Animator.SetBool(Keys.Running, true);
 
-            _animator.SetBool(Keys.CarryingIdle, false);
-            _animator.SetBool(Keys.CarryingRunning, false);
+            Animator.SetBool(Keys.CarryingIdle, false);
+            Animator.SetBool(Keys.CarryingRunning, false);
 
             _currentAnimation = Keys.Running;
         }
