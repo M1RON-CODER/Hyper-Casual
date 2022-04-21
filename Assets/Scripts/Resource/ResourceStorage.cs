@@ -44,7 +44,7 @@ public class ResourceStorage : Resource
     {
         if ((_resources.Count == _resourcePositions.Count) || (player.ResourcesOnHands.Count == 0))
         {
-            throw new Exception("No space for resources");
+            throw new Exception("No space for resources ");
         }
 
         Sequence sequence = DOTween.Sequence();
