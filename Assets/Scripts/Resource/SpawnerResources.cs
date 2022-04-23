@@ -83,6 +83,6 @@ public class SpawnerResources: Resource
             {
                 TakeResource();
             }
-        }).SetDelay(_easing + 0.2f);
+        }).SetDelay(_easing);
     }
 }

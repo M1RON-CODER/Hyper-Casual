@@ -8,6 +8,7 @@ public class SpawnerEmployee : MonoBehaviour
 {
     [SerializeField] private GameObject _employee;
     [SerializeField] private TMP_Text _cost;
+    [SerializeField] private int _costValue;
 
     private bool _isHavePlayer;
     private Progress _progress;
@@ -15,6 +16,11 @@ public class SpawnerEmployee : MonoBehaviour
     public GameObject Employee => _employee;
 
     #region MonoBehaviour
+    private void Start()
+    {
+        _cost.text = _costValue.ToString();
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if(other.TryGetComponent(out Player player))
@@ -49,25 +55,27 @@ public class SpawnerEmployee : MonoBehaviour
         {
             yield break;
         }
-        
-        int count = Convert.ToInt32(_cost.text);
-        while(count > 0)
+
+        while(_costValue > 0)
         {
             var i = UnityEngine.Random.Range(5, 25);
 
-            if (player.CashData.Cash < i)
+            if (player.CashData.Cash == 0)
             {
+                Debug.Log("Не хватает денег");
                 break;
             }
+            int withdrawCash = (player.CashData.Cash >= i) ? ((i > _costValue) ? _costValue : i) : player.CashData.Cash;
+            Debug.Log(withdrawCash);
+            player.CashData.WithdrawCash(withdrawCash);
 
-            _cost.text = i < 0 ? "0" : i.ToString();
-            player.CashData.WithdrawCash((i > count) ? count : i);
-            count -= i;
+            //Debug.Log($"i: {i} _costValue: {_costValue}");
+            _costValue -= withdrawCash;
+            _cost.text = _costValue.ToString();
 
-            yield return new WaitForSeconds(0.15f);
+            yield return new WaitForSeconds(0.15f);         
         }
-
-        _progress.IncreaseProgress();
-        Active();
+        //_progress.IncreaseProgress();
+        // Active();
     }
 }

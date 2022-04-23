@@ -5,9 +5,13 @@ using UnityEngine;
 public class CashData : MonoBehaviour
 {
     [SerializeField] private Canvases _canvases;
-    private int _cash;
+    [SerializeField] private int _cash;
 
     #region MonoBehaviour
+    private void OnValidate()
+    {
+        SaveCash();
+    }
     private void Awake()
     {
         _cash = PlayerPrefs.GetInt(Keys.Cash);
@@ -20,14 +24,12 @@ public class CashData : MonoBehaviour
     public void AddCash(int cash)
     {
         _cash += cash;
-        RefreshCash();
         SaveCash();
     }
 
     public void WithdrawCash(int cash)
     {
         _cash -= cash;
-        RefreshCash();
         SaveCash();
     }
 
@@ -39,5 +41,6 @@ public class CashData : MonoBehaviour
     private void SaveCash()
     {
         PlayerPrefs.SetInt(Keys.Cash, _cash);
+        RefreshCash();
     }
 }

@@ -247,7 +247,6 @@ public class AIController : AI
 
     private void AnimationAdjustment()
     {
-        Debug.Log(ResourcesOnHands.Count);
         if (ResourcesOnHands.Count > 0)
         {
             Animator.SetBool(Keys.CarryingIdle, true);

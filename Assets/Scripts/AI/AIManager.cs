@@ -40,12 +40,16 @@ public class AIManager : MonoBehaviour
             List<GameObject> waypoints = GetWaypoints();
             CashRegister cashRegister = GetNearestCashRegister(waypoints.Last());
             
-            GameObject bot = Instantiate(_AIPrefab, _spawnPoints[Random.Range(0, _spawnPoints.Count)].transform.position, Quaternion.identity);
-            bot.name = $"Bot_{++_numberAI}";
-            bot.GetComponent<AIController>().Initialize(this, cashRegister, _exitPoint);
-            bot.GetComponent<AIController>().SetTargets(waypoints);
+            GameObject AI = Instantiate(_AIPrefab, _spawnPoints[Random.Range(0, _spawnPoints.Count)].transform.position, Quaternion.identity);
+            AI.name = $"Bot_{++_numberAI}";
+
+            if(AI.TryGetComponent(out AIController AIController))
+            {
+                AIController.Initialize(this, cashRegister, _exitPoint);
+                AIController.SetTargets(waypoints);
+            }
             
-            _AI.Add(bot);
+            _AI.Add(AI);
         }  
     }
 
