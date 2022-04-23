@@ -1230,8 +1230,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c233510494c85e4f82298804ced8056, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerObject: {fileID: 0}
-  _handsPosition: {fileID: 0}
+  _playerObject: {fileID: 323021221}
+  _handsPosition: {fileID: 446133573}
   _cashData: {fileID: 1862977341}
   _joystick: {fileID: 8135886326603350232}
   _speed: 8
@@ -1849,7 +1849,7 @@ Transform:
   m_GameObject: {fileID: 446133572}
   m_LocalRotation: {x: 2.4730218e-13, y: -0, z: -1.13514755e-13, w: 1}
   m_LocalPosition: {x: 0, y: 0.007799999, z: 0.00397}
-  m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7141787986900415332}
@@ -2998,7 +2998,7 @@ MonoBehaviour:
   _cashRegisters:
   - {fileID: 3469287838097158824}
   _exitPoint: {fileID: 357549154}
-  _maxCountAIOnOneWaypoint: 4
+  _maxCountAIOnOneWaypoint: 1
 --- !u!4 &947374540
 Transform:
   m_ObjectHideFlags: 0
@@ -3760,7 +3760,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _resource: 0
-  _resourcePositions: []
+  _resourcePositions:
+  - {fileID: 971051766}
+  - {fileID: 822007731}
+  - {fileID: 748210005}
+  - {fileID: 1026256664}
+  - {fileID: 2021539086}
+  - {fileID: 696692619}
+  - {fileID: 2139997692}
+  - {fileID: 905842137}
 --- !u!1 &1155981482
 GameObject:
   m_ObjectHideFlags: 0
@@ -8889,8 +8897,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _resource: 0
-  _resourcePositions: []
-  _resourcePrefab: {fileID: 0}
+  _resourcePositions:
+  - {fileID: 506493599}
+  - {fileID: 706726457}
+  - {fileID: 1352360996}
+  _resourcePrefab: {fileID: 5089486288615743332, guid: fce0e533a6743294e830cbe4355ff69d,
+    type: 3}
   _delayInstatiateResources: 3
   _easing: 0.3
 --- !u!65 &3469287838242249130

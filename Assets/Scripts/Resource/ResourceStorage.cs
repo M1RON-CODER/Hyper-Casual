@@ -21,12 +21,14 @@ public class ResourceStorage : Resource
         {
             AddResourceToStorage(player);
         }
-        else if (other.TryGetComponent(out AIController AI))
+        
+        if (other.TryGetComponent(out AIController AI))
         {
             AI.Stop();
             _AI.Add(AI);
 
-            AllocateResourcesToAI(AI);
+            Sequence sequence = DOTween.Sequence();
+            sequence.OnComplete(() => { AllocateResourcesToAI(AI); }).SetDelay(0.5f);
         }
     }
 
@@ -44,7 +46,7 @@ public class ResourceStorage : Resource
     {
         if ((_resources.Count == _resourcePositions.Count) || (player.ResourcesOnHands.Count == 0))
         {
-            throw new Exception("No space for resources ");
+            return;
         }
 
         Sequence sequence = DOTween.Sequence();
@@ -60,16 +62,17 @@ public class ResourceStorage : Resource
                 continue;
             }
             
-            _resources.Insert(0, resource.Obj);
-            sequence.Append(resource.Obj.transform.DOMove(_resourcePositions[0].position, 0.5f));
-
             player.RemoveResourceFromHands(resource);
+            _resources.Insert(0, resource.Obj);
+            resource.Obj.transform.DOMove(_resourcePositions[_resources.Count - 1].position, 0.3f);
+
         }
 
         sequence.OnComplete(() => 
         {
             AllocateResourcesToAI();
-        });
+        })
+        .SetDelay(0.35f);
     }
 
     public GameObject RemoveResourceFromStorage()
@@ -89,28 +92,21 @@ public class ResourceStorage : Resource
     {
         foreach (AIController AI in _AI.ToList())
         {
-            foreach (GameObject resource in _resources.ToList())
-            {
-                _resources.Remove(resource);
-                if (AI.AddResourceToHands(resource))
-                {
-                    _AI.Remove(AI);
-                    return;
-                }
-            }
+            AI.AddResourceOnHands(_resources);
+            _AI.Remove(AI);
         }
     }
 
     private void AllocateResourcesToAI(AIController AI)
     {
-        foreach (GameObject resource in _resources.ToList())
+        if(_resources.Count == 0)
         {
-            _resources.Remove(resource);
-            if (AI.AddResourceToHands(resource))
-            {
-                _AI.Remove(AI);
-                return;
-            }
+            return;
+        }   
+
+        if (AI.AddResourceOnHands(_resources))
+        {
+            _AI.Remove(AI);
         }
     }
 }

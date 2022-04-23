@@ -11,7 +11,7 @@ public class Cash : MonoBehaviour
     [Min(3)] [SerializeField] private int _productCost = 3;
 
     private List<GameObject> _cash = new();
-    private List<Transform> _startPostions = new();
+    private List<Transform> _startPostions;
     private int _cashAmount;
     private int _cashPosition;
 
@@ -20,7 +20,7 @@ public class Cash : MonoBehaviour
     #region MonoBehaviour
     private void Start()
     {
-        _startPostions = _cashPositions.ToList();     
+        _startPostions = new List<Transform>(_cashPositions);     
     }
     #endregion
 

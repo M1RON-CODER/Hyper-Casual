@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class AIController : AI
 {
-    private class TargetParams
+    public class TargetParams
     {
         private Transform _waypoint;
         private Resource.Resources _resource;
@@ -34,10 +34,12 @@ public class AIController : AI
     private List<TargetParams> _targets = new();
     private CashRegister _cashRegister;
     private AIManager _AIManager;
+    private TargetParams _currentTarget;
     private Transform _exitPoint;
     private string _currentAnimation = Keys.Idle;
 
     public AIManager AIManager => _AIManager;
+    public TargetParams CurrentTarget => _currentTarget;
 
     public void Initialize(AIManager AIManager, CashRegister cashRegister, Transform exitPoint)
     {
@@ -72,26 +74,55 @@ public class AIController : AI
         MoveWaypoint();
     }
 
-    public bool AddResourceToHands(GameObject resource)
+    public bool AddResourceOnHands(List<GameObject> resources)
     {
-        AnimationAdjustment();
-        
-        TargetParams target = _targets.FirstOrDefault();
-        if ((target == null) || (target.CurrentCountResources >= target.TotalCountResources))
+        if(_currentTarget == null)
         {
-            NextTarget();
+            return false;
+        }
+        
+        Sequence sequence = DOTween.Sequence();
+        int count = (_currentTarget.TotalCountResources <= resources.Count) ? _currentTarget.TotalCountResources : resources.Count;
+        int currentCount = _currentTarget.CurrentCountResources;
+        
+        for (int i = currentCount, index = 0; i < count; i++)
+        {
+            
+            Vector3 position = GetPositionForResourceOnHands();
+            resources[index].transform.SetParent(Hands);
+            sequence.Append(resources[index].transform.DOLocalJump(position, 1, 1, 0.5f));
+            
+            ResourcesOnHands.Insert(0, resources[index]);
+
+            _currentTarget.CurrentResourcePlusOne();
+            AIBar.RefreshData(_currentTarget.CurrentCountResources, _currentTarget.TotalCountResources);
+            
+            resources.Remove(resources[index]);
+        }
+        
+        AnimationAdjustment();
+
+        if (_currentTarget.CurrentCountResources == _currentTarget.TotalCountResources)
+        {
+            sequence.OnComplete(() =>
+            {
+                NextTarget();
+            });
+            
             return true;
         }
 
+        return false;
+    }
+
+    public void AddBoxToHands(GameObject box)
+    {
         Vector3 position = GetPositionForResourceOnHands();
-        resource.transform.DOLocalMove(position, 0.2f);
-        ResourcesOnHands.Insert(0, resource);
+        box.transform.SetParent(Hands);
+        box.transform.DOLocalMove(position, 0.2f);
+        ResourcesOnHands.Add(box);
 
-        AIBar.RefreshData(target.CurrentCountResources, target.TotalCountResources);
-
-        target.CurrentResourcePlusOne();
-
-        return target.CurrentCountResources >= target.TotalCountResources;
+        AnimationAdjustment();
     }
 
     public void RemoveResourceFromHands(GameObject resource)
@@ -109,22 +140,27 @@ public class AIController : AI
             throw new System.Exception("No targets");
         }
 
-        _targets.Remove(_targets.FirstOrDefault());
-        if(_targets.Count == 0)
+        if(_targets.Count - 1 > 0)
         {
-            MoveToCashRegister();
+            _targets.Remove(_targets.FirstOrDefault());
+            
+            _currentTarget = _targets.First();
+            MoveWaypoint();
         }
         else
         {
-            MoveWaypoint();
+            _currentTarget = null;
+            
+            MoveToCashRegister();
         }
+
     }
 
     public void MovePosition(Transform point)
     {        
         Agent.destination = point.position;
         Move();
-        StartCoroutine(StopDistanceCheck());
+        StartCoroutine(StopDistance());
     }
    
 
@@ -132,11 +168,15 @@ public class AIController : AI
     {
         MovePosition(_exitPoint);
         AIBar.Hide();
+
+        StartCoroutine(CheckDistanceForDestroy());
     }
 
     private void MoveWaypoint()
     {
         TargetParams target = _targets.First();
+        _currentTarget = target;
+        
         Agent.destination = target.Waypoint.position;
         Move();
         
@@ -170,7 +210,7 @@ public class AIController : AI
         return position;
     }
 
-    private IEnumerator StopDistanceCheck()
+    private IEnumerator StopDistance()
     {
         while (true)
         {
@@ -207,6 +247,7 @@ public class AIController : AI
 
     private void AnimationAdjustment()
     {
+        Debug.Log(ResourcesOnHands.Count);
         if (ResourcesOnHands.Count > 0)
         {
             Animator.SetBool(Keys.CarryingIdle, true);

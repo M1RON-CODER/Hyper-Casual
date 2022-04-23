@@ -11,7 +11,7 @@ public class AIManager : MonoBehaviour
     [SerializeField] private List<GameObject> _waypoints = new List<GameObject>();
     [SerializeField] private List<CashRegister> _cashRegisters = new List<CashRegister>();
     [SerializeField] private Transform _exitPoint;
-    [Min(4)] [SerializeField] private int _maxCountAIOnOneWaypoint;
+    [Min(0)] [SerializeField] private int _maxCountAIOnOneWaypoint;
 
     private List<GameObject> _AI = new List<GameObject>();
     private int _maxCountAI;

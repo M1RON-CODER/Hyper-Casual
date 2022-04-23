@@ -180,7 +180,7 @@ public class CashRegister : MonoBehaviour
     {
         float duration = 0.4f;
         
-        AI.AddResourceToHands(box.gameObject);
+        AI.AddBoxToHands(box.gameObject);
         box.transform.SetParent(AI.Hands);
         box.transform.DOLocalRotate(new Vector3(0, 90, 0), duration);
 

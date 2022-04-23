@@ -31,18 +31,17 @@ public class PlayerController : Player
 
     public bool AddResourcesOnHands(Resource.Resources resource, GameObject resourceObj)
     {
-        AnimationAdjustment();
-
         if (ResourcesOnHands.Count >= MaxCountOnHands)
         {
             return true;
         }
         
         Vector3 position = GetPositionForResourceOnHands();
-        resourceObj.transform.SetParent(Hands.transform);
+        resourceObj.transform.SetParent(Hands);
         resourceObj.transform.DOLocalMove(position, 0.2f);
 
         ResourcesOnHands.Insert(0, (new Resource.ResourceParams { Obj = resourceObj, Resource = resource }));
+        AnimationAdjustment();
 
         return false;
     }

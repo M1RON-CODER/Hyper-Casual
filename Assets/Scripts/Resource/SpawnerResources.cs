@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,6 +48,7 @@ public class SpawnerResources: Resource
     {
         foreach (GameObject resource in _resources.ToList())
         {
+            
             if (_playerController.AddResourcesOnHands(CurrentResource, resource))
             {
                 return;
@@ -58,35 +60,29 @@ public class SpawnerResources: Resource
         Invoke(nameof(InstantiateResources), _delayInstatiateResources);
     }
 
-    private IEnumerator ChangeOfScale(GameObject obj, Vector3 endScale, float easing)
-    {
-        float t = 0;
-        while (t <= 1.0f)
-        {
-            t += Time.deltaTime / easing;
-            obj.transform.localScale = Vector3.Lerp(obj.transform.localScale, endScale, t);
-            yield return null;
-        }
-    }
-
     private void InstantiateResources()
     {
         int count = _resourcePositions.Count - _resources.Count;
 
+        Sequence sequence = DOTween.Sequence();
         for (int i = 0; i < count; i++)
         {
             GameObject resource = Instantiate(_resourcePrefab, _resourcePositions[i]);
             resource.name = i.ToString();
-            _resources.Insert(0, resource);
-
+            _resources.Add(resource);
+            resource.transform.SetParent(_resourcePositions[i]);
+            
             Vector3 endScale = resource.transform.localScale;
             resource.transform.localScale = Vector3.zero;
-            StartCoroutine(ChangeOfScale(resource, endScale, _easing));
+            resource.transform.DOScale(endScale, _easing);
         }
-
-        if (_isPlayerEnter)
+        
+        sequence.OnComplete(() =>
         {
-            Invoke(nameof(TakeResource), 0.1f);
-        }
+            if (_isPlayerEnter)
+            {
+                TakeResource();
+            }
+        }).SetDelay(_easing + 0.2f);
     }
 }
