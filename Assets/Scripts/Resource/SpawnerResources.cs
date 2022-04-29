@@ -51,7 +51,7 @@ public class SpawnerResources: Resource
             
             if (_playerController.AddResourcesOnHands(CurrentResource, resource))
             {
-                return;
+                break;
             }
 
             _resources.Remove(resource);

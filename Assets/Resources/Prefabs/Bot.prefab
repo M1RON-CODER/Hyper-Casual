@@ -1371,6 +1371,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7107affbd4acf74a9418da023748360, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _skin: {fileID: 6231102542842813933}
   _handsPosition: {fileID: 5419406741980609522}
   _AIBar: {fileID: 3163527134771809288}
 --- !u!195 &7886216152725778560

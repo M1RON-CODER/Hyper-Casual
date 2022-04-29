@@ -14,7 +14,7 @@ public class Progress : MonoBehaviour
     #region MonoBehaviour
     private void Awake()
     {
-        _progressIndex = PlayerPrefs.GetInt(Keys.ProgressIndex, 0);
+        _progressIndex = PlayerPrefs.GetInt(Keys.PlayerPrefs.ProgressIndex.ToString(), 0);
 
         ActiveOpenObject();
     }
@@ -23,7 +23,7 @@ public class Progress : MonoBehaviour
     public void IncreaseProgress()
     {
         _progressIndex++;
-        PlayerPrefs.SetInt(Keys.ProgressIndex, _progressIndex);
+        PlayerPrefs.SetInt(Keys.PlayerPrefs.ProgressIndex.ToString(), _progressIndex);
     }
 
     private void ActiveOpenObject()

@@ -4,21 +4,29 @@ using UnityEngine;
 
 public class Keys
 {
-    // Animation Keys
-    public const string Idle = "Idle";
-    public const string Walking = "Walking";
-    public const string Running = "Running";
-    public const string CarryingIdle = "Carrying Idle";
-    public const string CarryingWalking = "Carrying Walking";
-    public const string CarryingRunning = "Carrying Running";
+    public enum Animation
+    {
+        Idle,
+        Walking,
+        Running,
+        CarryingIdle,
+        CarryingWalking,
+        CarryingRunning,
+        Opening
+    }
 
-    public const string Opening = "Opening";
+    public enum PlayerPrefs
+    {
+        Cash,
+        PlayerMaxCountOnHands,
+        PlayerLevel,
+        GetCash,
+        ProgressIndex,
+        UnderProgressIndex,
+    }
 
-    // Player Prefs
-    public const string Cash = "Cash";
-    public const string MaxCountOnHands = "MaxCountOnHands";
-    public const string PlayerLevel = "PlayerLevel";
-    public const string GetCash = "GetCash";
-    public const string ProgressIndex = "ProgressIndex";
-    public const string UnderProgressIndex = "UnderProgressIndex";
+    public enum AIPrefs
+    {
+        HelperMaxCountOnHands,
+    }
 }

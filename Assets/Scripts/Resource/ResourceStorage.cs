@@ -1,8 +1,6 @@
-using DG.Tweening;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class ResourceStorage : Resource
@@ -10,7 +8,9 @@ public class ResourceStorage : Resource
     [SerializeField] private List<Transform> _resourcePositions = new();
 
     private List<GameObject> _resources = new();
-    private List<AIController> _AI = new();
+    private List<Buyer> _AI = new();
+
+    private PlayerController _player;
 
     public new List<GameObject> Resources => _resources;
 
@@ -19,30 +19,36 @@ public class ResourceStorage : Resource
     {
         if (other.TryGetComponent(out PlayerController player))
         {
+            _player = player;
             AddResourceToStorage(player);
         }
-        
-        if (other.TryGetComponent(out AIController AI))
+
+        if (other.TryGetComponent(out Buyer AI))
         {
             AI.Stop();
             _AI.Add(AI);
 
             Sequence sequence = DOTween.Sequence();
-            sequence.OnComplete(() => { AllocateResourcesToAI(AI); }).SetDelay(0.5f);
+            sequence.OnComplete(() => { AllocateResourcesToAI(AI); }).SetDelay(0.25f);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent(out AIController AI))
+        if (other.TryGetComponent(out PlayerController player))
+        {
+            _player = null;
+        }
+
+        if (other.TryGetComponent(out Buyer AI))
         {
             AI.Move();
             _AI.Remove(AI);
         }
     }
     #endregion
-    
-    protected void AddResourceToStorage(PlayerController player)
+
+    protected void AddResourceToStorage(PlayerController? player)
     {
         if ((_resources.Count == _resourcePositions.Count) || (player.ResourcesOnHands.Count == 0))
         {
@@ -61,18 +67,17 @@ public class ResourceStorage : Resource
             {
                 continue;
             }
-            
+
             player.RemoveResourceFromHands(resource);
             _resources.Insert(0, resource.Obj);
             resource.Obj.transform.DOMove(_resourcePositions[_resources.Count - 1].position, 0.3f);
-
         }
 
         sequence.OnComplete(() => 
         {
             AllocateResourcesToAI();
         })
-        .SetDelay(0.35f);
+        .SetDelay(0.3f);
     }
 
     public GameObject RemoveResourceFromStorage()
@@ -84,20 +89,23 @@ public class ResourceStorage : Resource
 
             return resource;
         }
-        
         return null;
     }
-    
+
     private void AllocateResourcesToAI()
     {
-        foreach (AIController AI in _AI.ToList())
+        foreach (Buyer AI in _AI.ToList())
         {
-            AI.AddResourceOnHands(_resources);
-            _AI.Remove(AI);
+            if (AI.AddResourceOnHands(_resources))
+            {
+                _AI.Remove(AI);
+            }
         }
+
+        AddResourceToStorage(_player);
     }
 
-    private void AllocateResourcesToAI(AIController AI)
+    private void AllocateResourcesToAI(Buyer AI)
     {
         if(_resources.Count == 0)
         {
@@ -108,5 +116,7 @@ public class ResourceStorage : Resource
         {
             _AI.Remove(AI);
         }
+
+        AddResourceToStorage(_player);        
     }
 }

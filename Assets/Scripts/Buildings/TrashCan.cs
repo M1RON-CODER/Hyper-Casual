@@ -4,19 +4,28 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
 public class TrashCan : MonoBehaviour
 {
-    [Min(0.2f)] [SerializeField] private float _duration = 0.2f;
+    [Min(0.1f)] [SerializeField] private float _duration = 0.2f;
 
+    private Animator _animator;
     private bool _isEntry;
 
     #region MonoBehaviour
+    private void Start()
+    {
+        _animator = GetComponent<Animator>();
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent(out PlayerController player))
         {
             _isEntry = true;
             StartCoroutine(RemoveResourcesInHands(player));
+
+            _animator.SetBool(Keys.Animation.Opening.ToString(), true);
         }
     }
 
@@ -25,6 +34,8 @@ public class TrashCan : MonoBehaviour
         if (other.TryGetComponent(out PlayerController player))
         {
             _isEntry = false;
+
+            _animator.SetBool(Keys.Animation.Opening.ToString(), false);
         }
     }
     #endregion
@@ -47,5 +58,7 @@ public class TrashCan : MonoBehaviour
 
             yield return new WaitForSeconds(_duration);
         }
+
+        _animator.SetBool(Keys.Animation.Opening.ToString(), false);
     }
 }

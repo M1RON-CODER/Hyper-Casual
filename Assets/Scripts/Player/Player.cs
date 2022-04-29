@@ -29,14 +29,14 @@ public abstract class Player : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
         
-        _maxCountOnHands = PlayerPrefs.GetInt(Keys.MaxCountOnHands, 3);
+        _maxCountOnHands = PlayerPrefs.GetInt(Keys.PlayerPrefs.PlayerMaxCountOnHands.ToString(), 3);
     }
     #endregion
 
     public void IncreaseMaxCountOnHands()
     {
         _maxCountOnHands++;
-        PlayerPrefs.SetInt(Keys.MaxCountOnHands, MaxCountOnHands);
+        PlayerPrefs.SetInt(Keys.PlayerPrefs.PlayerMaxCountOnHands.ToString(), MaxCountOnHands);
     }
 }
 

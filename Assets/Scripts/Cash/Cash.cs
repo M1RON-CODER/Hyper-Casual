@@ -11,17 +11,12 @@ public class Cash : MonoBehaviour
     [Min(3)] [SerializeField] private int _productCost = 3;
 
     private List<GameObject> _cash = new();
-    private List<Transform> _startPostions;
     private int _cashAmount;
     private int _cashPosition;
 
     public int ProductCost => _productCost;
 
     #region MonoBehaviour
-    private void Start()
-    {
-        _startPostions = new List<Transform>(_cashPositions);     
-    }
     #endregion
 
     public void AddCashOnCashRegister(Transform playerPosition, int cash)
@@ -81,8 +76,8 @@ public class Cash : MonoBehaviour
         }
 
         player.CashData.AddCash(_cashAmount);
-
-        _cashPositions = _startPostions;
+        
+        _cashPositions.ForEach(cashPosition => cashPosition.localPosition = new Vector3(cashPosition.localPosition.x, 0, cashPosition.localPosition.z));
         _cashAmount = 0;
         _cashPosition = 0;
     }

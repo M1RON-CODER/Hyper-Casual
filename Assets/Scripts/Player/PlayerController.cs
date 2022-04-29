@@ -1,4 +1,5 @@
 using DG.Tweening;
+using MoreMountains.NiceVibrations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,10 @@ public class PlayerController : Player
     [SerializeField] private DynamicJoystick _joystick;
     [SerializeField] private int _speed;
 
-    private string _currentAnimation = Keys.Running;
+    private string _currentAnimation = Keys.Animation.Running.ToString();
+    private bool _isEntry = false;
+
+    public bool IsEntry => _isEntry;
 
     #region MonoBehaviour
 
@@ -41,7 +45,9 @@ public class PlayerController : Player
         resourceObj.transform.DOLocalMove(position, 0.2f);
 
         ResourcesOnHands.Insert(0, (new Resource.ResourceParams { Obj = resourceObj, Resource = resource }));
+
         AnimationAdjustment();
+        MMVibrationManager.Haptic(HapticTypes.LightImpact, false, true, this);
 
         return false;
     }
@@ -57,8 +63,19 @@ public class PlayerController : Player
         ResourcesOnHands.Remove(resource);
 
         AnimationAdjustment();
+        MMVibrationManager.Haptic(HapticTypes.LightImpact, false, true, this);
     }
 
+    public void Enter()
+    {
+        _isEntry = true;
+    }
+
+    public void Exit()
+    {
+        _isEntry = false;
+    }
+    
     private Vector3 GetPositionForResourceOnHands()
     {
         if (ResourcesOnHands.Count == 0)
@@ -67,10 +84,9 @@ public class PlayerController : Player
         }
 
         Vector3 position = Vector3.zero;
-        
         foreach (Resource.ResourceParams resource in ResourcesOnHands)
         {
-            position.y += resource.Obj.transform.localScale.x;
+            position.y += resource.Obj.transform.localScale.y;
         }
 
         return position;    
@@ -80,23 +96,23 @@ public class PlayerController : Player
     {
         if (ResourcesOnHands.Count > 0)
         {
-            Animator.SetBool(Keys.CarryingIdle, true);
-            Animator.SetBool(Keys.CarryingRunning, true);
+            Animator.SetBool(Keys.Animation.CarryingIdle.ToString(), true);
+            Animator.SetBool(Keys.Animation.CarryingRunning.ToString(), true);
 
-            Animator.SetBool(Keys.Idle, false);
-            Animator.SetBool(Keys.Running, false);
-
-            _currentAnimation = Keys.CarryingRunning;
+            Animator.SetBool(Keys.Animation.Idle.ToString(), false);
+            Animator.SetBool(Keys.Animation.Running.ToString(), false);
+            
+            _currentAnimation = Keys.Animation.CarryingRunning.ToString();
         }
         else
         {
-            Animator.SetBool(Keys.Idle, true);
-            Animator.SetBool(Keys.Running, true);
+            Animator.SetBool(Keys.Animation.Idle.ToString(), true);
+            Animator.SetBool(Keys.Animation.Running.ToString(), true);
 
-            Animator.SetBool(Keys.CarryingIdle, false);
-            Animator.SetBool(Keys.CarryingRunning, false);
+            Animator.SetBool(Keys.Animation.CarryingIdle.ToString(), false);
+            Animator.SetBool(Keys.Animation.CarryingRunning.ToString(), false);
 
-            _currentAnimation = Keys.Running;
+            _currentAnimation = Keys.Animation.Running.ToString();
         }
     }
 }

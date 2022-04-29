@@ -12,7 +12,7 @@ public class CashRegister : MonoBehaviour
     public class Queue
     {
         private Transform _position;
-        private AIController _AI;
+        private Buyer _AI;
         private bool _isBusyPlace;
         private bool _onSpot;
 
@@ -24,11 +24,11 @@ public class CashRegister : MonoBehaviour
         }
 
         public Transform Position => _position;
-        public AIController AI => _AI;
+        public Buyer AI => _AI;
         public bool IsBusyPlace => _isBusyPlace;
         public bool OnSpot => _onSpot; 
 
-        public void SetBusyPlace(AIController AI)
+        public void SetBusyPlace(Buyer AI)
         {
             _AI = AI;
             _isBusyPlace = true;
@@ -73,7 +73,6 @@ public class CashRegister : MonoBehaviour
         
         if (other.TryGetComponent(out Cashier AI))
         {
-            // _isHavePlayer = true;
             _isHaveCashier = true;
             
             Serve();
@@ -97,6 +96,7 @@ public class CashRegister : MonoBehaviour
             Sequence sequence = DOTween.Sequence();
             if ((queue.AI != null) && queue.OnSpot)
             {
+                Debug.Log(queue.AI.name + " Serve");
                 Box box = InstantiateBox(queue);
                 sequence
                     .OnComplete(() => 
@@ -113,7 +113,7 @@ public class CashRegister : MonoBehaviour
         return _queues.FindIndex(q => !q.IsBusyPlace);
     }
 
-    public int CurrentIndex(AIController AI)
+    public int CurrentIndex(Buyer AI)
     {
         return _queues.FindIndex(q => q.AI == AI);
     }
@@ -176,7 +176,7 @@ public class CashRegister : MonoBehaviour
         }
     }
 
-    private Tween MoveBoxToHands(Box box, AIController AI)
+    private Tween MoveBoxToHands(Box box, Buyer AI)
     {
         float duration = 0.4f;
         

@@ -5,15 +5,15 @@ using UnityEngine;
 
 public class AIManager : MonoBehaviour
 {
+    [SerializeField] private List<Transform> _spawnPoints = new();
+    [SerializeField] private List<GameObject> _waypoints = new();
+    [SerializeField] private List<CashRegister> _cashRegisters = new();
+    [SerializeField] private List<Transform> _exitPoints;
     [SerializeField] private GameObject _AIPrefab;
-    [SerializeField] private Sprites _sprites;
-    [SerializeField] private List<Transform> _spawnPoints = new List<Transform>();
-    [SerializeField] private List<GameObject> _waypoints = new List<GameObject>();
-    [SerializeField] private List<CashRegister> _cashRegisters = new List<CashRegister>();
-    [SerializeField] private Transform _exitPoint;
+    [SerializeField] private Skin _skin;
     [Min(0)] [SerializeField] private int _maxCountAIOnOneWaypoint;
 
-    private List<GameObject> _AI = new List<GameObject>();
+    private List<GameObject> _AI = new();
     private int _maxCountAI;
     private int _numberAI;
 
@@ -43,9 +43,10 @@ public class AIManager : MonoBehaviour
             GameObject AI = Instantiate(_AIPrefab, _spawnPoints[Random.Range(0, _spawnPoints.Count)].transform.position, Quaternion.identity);
             AI.name = $"Bot_{++_numberAI}";
 
-            if(AI.TryGetComponent(out AIController AIController))
+            if(AI.TryGetComponent(out Buyer AIController))
             {
-                AIController.Initialize(this, cashRegister, _exitPoint);
+                AIController.Skin.material = _skin.Skins[Random.Range(0, _skin.Skins.Count)];
+                AIController.Initialize(this, cashRegister, _exitPoints[Random.Range(0, _exitPoints.Count)]);
                 AIController.SetTargets(waypoints);
             }
             
@@ -53,12 +54,12 @@ public class AIManager : MonoBehaviour
         }  
     }
 
-    public void DestroyAI(AIController AI)
+    public void DestroyAI(Buyer AI)
     {
         Destroy(AI.gameObject);
     }
 
-    public void RemoveAIFromQueue(AIController AI)
+    public void RemoveAIFromQueue(Buyer AI)
     {
         _AI.Remove(AI.gameObject);
     }

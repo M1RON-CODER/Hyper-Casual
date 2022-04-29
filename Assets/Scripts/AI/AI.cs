@@ -7,6 +7,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public abstract class AI : MonoBehaviour
 {
+    [SerializeField] private Renderer _skin;
     [SerializeField] private Transform _handsPosition;
     [SerializeField] private AIBar _AIBar;
 
@@ -14,6 +15,7 @@ public abstract class AI : MonoBehaviour
     private NavMeshAgent _agent;
     private Animator _animator;
 
+    public Renderer Skin => _skin;
     public Transform Hands => _handsPosition;
     public AIBar AIBar => _AIBar;
     public List<GameObject> ResourcesOnHands => _resourcesOnHands;

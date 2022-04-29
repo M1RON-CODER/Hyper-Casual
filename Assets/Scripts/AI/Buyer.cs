@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class AIController : AI
+public class Buyer : AI
 {
     public class TargetParams
     {
@@ -36,7 +36,7 @@ public class AIController : AI
     private AIManager _AIManager;
     private TargetParams _currentTarget;
     private Transform _exitPoint;
-    private string _currentAnimation = Keys.Idle;
+    private string _currentAnimation = Keys.Animation.Idle.ToString();
 
     public AIManager AIManager => _AIManager;
     public TargetParams CurrentTarget => _currentTarget;
@@ -87,32 +87,33 @@ public class AIController : AI
         
         for (int i = currentCount, index = 0; i < count; i++)
         {
-            
             Vector3 position = GetPositionForResourceOnHands();
             resources[index].transform.SetParent(Hands);
-            sequence.Append(resources[index].transform.DOLocalJump(position, 1, 1, 0.5f));
+            sequence.Append(resources[index].transform.DOLocalJump(position, 1, 1, 0.3f).OnStart(() => 
+            { 
+                
+                _currentTarget.CurrentResourcePlusOne();
+                AIBar.RefreshData(_currentTarget.CurrentCountResources, _currentTarget.TotalCountResources);
+
+            }).OnComplete(() =>
+            {
+                if (_currentTarget.CurrentCountResources == _currentTarget.TotalCountResources)
+                {
+                    sequence.OnComplete(() =>
+                    {
+                        NextTarget();
+                    });
+                }
+            }));
             
             ResourcesOnHands.Insert(0, resources[index]);
-
-            _currentTarget.CurrentResourcePlusOne();
-            AIBar.RefreshData(_currentTarget.CurrentCountResources, _currentTarget.TotalCountResources);
-            
             resources.Remove(resources[index]);
         }
         
         AnimationAdjustment();
+        Animator.SetBool(_currentAnimation, false);
 
-        if (_currentTarget.CurrentCountResources == _currentTarget.TotalCountResources)
-        {
-            sequence.OnComplete(() =>
-            {
-                NextTarget();
-            });
-            
-            return true;
-        }
-
-        return false;
+        return count == _currentTarget.TotalCountResources;
     }
 
     public void AddBoxToHands(GameObject box)
@@ -131,6 +132,7 @@ public class AIController : AI
         ResourcesOnHands.Remove(resource);
 
         AnimationAdjustment();
+        Animator.SetBool(_currentAnimation, false);
     }
     
     public void NextTarget()
@@ -190,6 +192,7 @@ public class AIController : AI
         queue.SetBusyPlace(this);
         
         MovePosition(queue.Position);
+        StartCoroutine(StopDistanceCashRegister());
         AIBar.SetData(Building.Buildings.CashRegister);
     }
 
@@ -201,12 +204,11 @@ public class AIController : AI
         }
 
         Vector3 position = Vector3.zero;
-
         foreach (GameObject resource in ResourcesOnHands)
         {
-            position.y += resource.transform.localScale.x;
+            position.y += resource.transform.localScale.y;
         }
-
+        
         return position;
     }
 
@@ -219,15 +221,33 @@ public class AIController : AI
             if (Agent.remainingDistance <= 0.1f)
             {
                 Stop();
+                yield break;
+            }
+        }
+    }
 
+    private IEnumerator StopDistanceCashRegister()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(0.3f);
+
+            if (Agent.remainingDistance <= 0.1f)
+            {
                 int index = _cashRegister.CurrentIndex(this);
-                if(index == 0)
+                Debug.Log($"index in queye: {index} ({this.gameObject.name})");
+                if (index == 0)
                 {
+                    if (_cashRegister.Queues[index].OnSpot)
+                    {
+                        yield return null;
+                    }
+
                     _cashRegister.Queues[index].SetOnSpot(true);
                     _cashRegister.Serve();
-                }
 
-                yield break;
+                    yield break;
+                }
             }
         }
     }
@@ -249,23 +269,23 @@ public class AIController : AI
     {
         if (ResourcesOnHands.Count > 0)
         {
-            Animator.SetBool(Keys.CarryingIdle, true);
-            Animator.SetBool(Keys.CarryingWalking, true);
+            Animator.SetBool(Keys.Animation.CarryingIdle.ToString(), true);
+            Animator.SetBool(Keys.Animation.CarryingWalking.ToString(), true);
 
-            Animator.SetBool(Keys.Idle, false);
-            Animator.SetBool(Keys.Walking, false);
+            Animator.SetBool(Keys.Animation.Idle.ToString(), false);
+            Animator.SetBool(Keys.Animation.Walking.ToString(), false);
 
-            _currentAnimation = Keys.CarryingWalking;
+            _currentAnimation = Keys.Animation.CarryingWalking.ToString();
         }
         else
         {
-            Animator.SetBool(Keys.Idle, true);
-            Animator.SetBool(Keys.Walking, true);
+            Animator.SetBool(Keys.Animation.Idle.ToString(), true);
+            Animator.SetBool(Keys.Animation.Walking.ToString(), true);
 
-            Animator.SetBool(Keys.CarryingIdle, false);
-            Animator.SetBool(Keys.CarryingWalking, false);
+            Animator.SetBool(Keys.Animation.CarryingIdle.ToString(), false);
+            Animator.SetBool(Keys.Animation.CarryingWalking.ToString(), false);
 
-            _currentAnimation = Keys.Walking;
+            _currentAnimation = Keys.Animation.Walking.ToString();
         }
     }
 }

@@ -20,11 +20,11 @@ public class Box : MonoBehaviour
 
     public void OpenBox()
     {
-        _animator.SetBool(Keys.Opening, true);
+        _animator.SetBool(Keys.Animation.Opening.ToString(), true);
     }
 
     public void CloseBox()
     {
-        _animator.SetBool(Keys.Opening, false);
+        _animator.SetBool(Keys.Animation.Opening.ToString(), false);
     }
 }
