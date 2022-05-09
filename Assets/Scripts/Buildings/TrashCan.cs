@@ -1,7 +1,6 @@
-using DG.Tweening;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
@@ -42,7 +41,7 @@ public class TrashCan : MonoBehaviour
 
     private IEnumerator RemoveResourcesInHands(PlayerController player)
     {
-        foreach (Resource.ResourceParams resource in player.ResourcesOnHands.ToList())
+        foreach (Resource.ResourceBase resource in player.ResourcesOnHands.ToList())
         {
             if (_isEntry)
             {
@@ -50,7 +49,7 @@ public class TrashCan : MonoBehaviour
                 resource.Obj.transform.DOMove(transform.position, _duration);
                 Destroy(resource.Obj, _duration);
             }
-            
+
             if (!_isEntry)
             {
                 yield break;

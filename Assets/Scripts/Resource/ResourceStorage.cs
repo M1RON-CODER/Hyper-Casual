@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class ResourceStorage : Resource
 {
-    [SerializeField] private List<Transform> _resourcePositions = new();
+    [SerializeField] private List<Transform> _resourcePositions = new ();
 
-    private List<GameObject> _resources = new();
-    private List<Buyer> _AI = new();
+    private List<GameObject> _resources = new ();
+    private List<Buyer> _buyer = new ();
 
     private PlayerController _player;
 
@@ -23,13 +23,23 @@ public class ResourceStorage : Resource
             AddResourceToStorage(player);
         }
 
-        if (other.TryGetComponent(out Buyer AI))
+        if (other.TryGetComponent(out Buyer buyer))
         {
-            AI.Stop();
-            _AI.Add(AI);
+            if (buyer.CurrentTarget == null)
+            {
+                return;
+            }
+
+            buyer.Stop();
+            _buyer.Add(buyer);
 
             Sequence sequence = DOTween.Sequence();
-            sequence.OnComplete(() => { AllocateResourcesToAI(AI); }).SetDelay(0.25f);
+            sequence.OnComplete(() => { AllocateResourcesBuyer(buyer); }).SetDelay(0.25f);
+        }
+
+        if (other.TryGetComponent(out Helper helper))
+        {
+            AddResourceToStorage(helper);
         }
     }
 
@@ -40,10 +50,10 @@ public class ResourceStorage : Resource
             _player = null;
         }
 
-        if (other.TryGetComponent(out Buyer AI))
+        if (other.TryGetComponent(out Buyer buyer))
         {
-            AI.Move();
-            _AI.Remove(AI);
+            buyer.Move();
+            _buyer.Remove(buyer);
         }
     }
     #endregion
@@ -56,9 +66,9 @@ public class ResourceStorage : Resource
         }
 
         Sequence sequence = DOTween.Sequence();
-        foreach (ResourceParams resource in player.ResourcesOnHands.ToList())
+        foreach (ResourceBase resource in player.ResourcesOnHands.ToList())
         {
-            if(_resources.Count >= _resourcePositions.Count)
+            if (_resources.Count >= _resourcePositions.Count)
             {
                 return;
             }
@@ -73,7 +83,41 @@ public class ResourceStorage : Resource
             resource.Obj.transform.DOMove(_resourcePositions[_resources.Count - 1].position, 0.3f);
         }
 
-        sequence.OnComplete(() => 
+        sequence.OnComplete(() =>
+        {
+            AllocateResourcesToAI();
+        })
+        .SetDelay(0.3f);
+    }
+
+    protected void AddResourceToStorage(Helper? helper)
+    {
+        if ((_resources.Count == _resourcePositions.Count) || (helper.ResourcesOnHands.Count == 0))
+        {
+            return;
+        }
+
+        Sequence sequence = DOTween.Sequence();
+        foreach (ResourceBase resource in helper.ResourcesOnHands.ToList())
+        {
+            if (_resources.Count >= _resourcePositions.Count)
+            {
+                return;
+            }
+
+            if (resource.Resource != CurrentResource)
+            {
+                continue;
+            }
+
+            helper.RemoveResourceFromHands(resource);
+            _resources.Insert(0, resource.Obj);
+            resource.Obj.transform.DOMove(_resourcePositions[_resources.Count - 1].position, 0.3f);
+        }
+
+        helper.Move(helper.ProductionResource);
+
+        sequence.OnComplete(() =>
         {
             AllocateResourcesToAI();
         })
@@ -89,34 +133,35 @@ public class ResourceStorage : Resource
 
             return resource;
         }
+
         return null;
     }
 
     private void AllocateResourcesToAI()
     {
-        foreach (Buyer AI in _AI.ToList())
+        foreach (Buyer buyer in _buyer.ToList())
         {
-            if (AI.AddResourceOnHands(_resources))
+            if (buyer.AddResourceOnHands(_resources))
             {
-                _AI.Remove(AI);
+                _buyer.Remove(buyer);
             }
         }
 
         AddResourceToStorage(_player);
     }
 
-    private void AllocateResourcesToAI(Buyer AI)
+    private void AllocateResourcesBuyer(Buyer buyer)
     {
-        if(_resources.Count == 0)
+        if (_resources.Count == 0)
         {
             return;
-        }   
-
-        if (AI.AddResourceOnHands(_resources))
-        {
-            _AI.Remove(AI);
         }
 
-        AddResourceToStorage(_player);        
+        if (buyer.AddResourceOnHands(_resources))
+        {
+            _buyer.Remove(buyer);
+        }
+
+        AddResourceToStorage(_player);
     }
 }

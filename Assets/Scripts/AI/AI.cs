@@ -5,13 +5,13 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(NavMeshAgent))]
-public abstract class AI : MonoBehaviour
+public abstract class AI : MonoBehaviour, IHumanoid
 {
     [SerializeField] private Renderer _skin;
     [SerializeField] private Transform _handsPosition;
     [SerializeField] private AIBar _AIBar;
 
-    private List<GameObject> _resourcesOnHands = new();
+    private List<GameObject> _resourcesOnHands = new ();
     private NavMeshAgent _agent;
     private Animator _animator;
 
@@ -29,6 +29,19 @@ public abstract class AI : MonoBehaviour
         _animator = GetComponent<Animator>();
     }
     #endregion
+
+    public virtual bool AddResourceOnHands(Resource.Resources resource, GameObject resourceObj)
+    {
+        return false;
+    }
+
+    public virtual void RemoveResourceFromHands(Resource.ResourceBase resource)
+    {
+    }
+
+    public virtual void AnimationAdjustment()
+    {
+    }
 
     public virtual void Move()
     {

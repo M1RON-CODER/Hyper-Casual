@@ -11,12 +11,26 @@ public class Cash : MonoBehaviour
     [Min(3)] [SerializeField] private int _productCost = 3;
 
     private List<GameObject> _cash = new();
+    private Player _player;
     private int _cashAmount;
     private int _cashPosition;
 
     public int ProductCost => _productCost;
 
     #region MonoBehaviour
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent(out Player player))
+        {
+            _player = player;
+            StartCoroutine(WithdrawCash(player));
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        _player = null;
+    }
     #endregion
 
     public void AddCashOnCashRegister(Transform playerPosition, int cash)
@@ -33,7 +47,6 @@ public class Cash : MonoBehaviour
                     if (cash <= j + 12)
                     {
                         var positionLevel = j / 12;
-                        Debug.Log("Position lvl: " + positionLevel);
                         _cashPositions.ForEach(x => x.position += Vector3.up * ((positionLevel == 0) ? 1 : positionLevel) * 0.25f);
                         break;
                     }
@@ -58,25 +71,45 @@ public class Cash : MonoBehaviour
         }
 
         _cashAmount += cash;
+/*        if (_player)
+        {
+            StartCoroutine(WithdrawCash(_player));
+        }*/
     }
 
-    public void WithdrawCash(Player player)
+    public IEnumerator WithdrawCash(Player player)
     {
-        if(_cashAmount == 0)
+        float duration = 0.08f;
+            
+        for (int i = _cash.Count - 1; i >= 0; i--)
         {
-            return;
-        }
-
-        foreach (GameObject cash in _cash)
-        {
-            cash.transform.DOMove(player.transform.position, 0.25f).OnComplete(() =>
+            if((_cashAmount == 0) || (!_player))
             {
-                cash.SetActive(false);
+                yield break;
+            }
+
+            if (!_cash[i].activeInHierarchy)
+            {
+                continue;
+            }
+            
+            _cash[i].transform.DOMove(new Vector3(player.transform.position.x, player.transform.position.y / 2, player.transform.position.z), duration).OnComplete(() =>
+            {
+                _cash[i].SetActive(false);
             });
+
+            player.CashData.AddCash(_productCost);
+            _cashAmount -= _productCost;
+            _cashPosition--;
+
+            if(_cashPosition + 1 % _cashPositions.Count == 0)
+            {
+                _cashPositions.ForEach(x => x.position -= Vector3.up * 0.25f);
+            }
+            
+            yield return new WaitForSeconds(duration);
         }
 
-        player.CashData.AddCash(_cashAmount);
-        
         _cashPositions.ForEach(cashPosition => cashPosition.localPosition = new Vector3(cashPosition.localPosition.x, 0, cashPosition.localPosition.z));
         _cashAmount = 0;
         _cashPosition = 0;
@@ -91,7 +124,6 @@ public class Cash : MonoBehaviour
                 return poolObject;
             }
         }
-        
         return null;
     }
 }

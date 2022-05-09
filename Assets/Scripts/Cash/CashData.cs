@@ -27,7 +27,7 @@ public class CashData : MonoBehaviour
     {
         _cash += cash;
         _canvases.GameCanvas.Cash.transform.DORewind();
-        _canvases.GameCanvas.Cash.transform.DOPunchScale(new Vector3(0.6f, 0.6f, 0.6f), 0.3f);
+        _canvases.GameCanvas.Cash.transform.DOPunchScale(new Vector3(0.6f, 0.6f, 0.6f), 0.1f);
         
         SaveCash();
     }
@@ -49,7 +49,8 @@ public class CashData : MonoBehaviour
     private void SaveCash()
     {
         PlayerPrefs.SetInt(Keys.PlayerPrefs.Cash.ToString(), _cash);
-        RefreshCash();
         MMVibrationManager.Haptic(HapticTypes.LightImpact, false, true, this);
+        
+        RefreshCash();
     }
 }

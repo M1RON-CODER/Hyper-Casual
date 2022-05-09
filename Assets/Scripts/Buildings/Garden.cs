@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Garden : SpawnerResources
+public class Garden : ProductionResource
 {
 
 }

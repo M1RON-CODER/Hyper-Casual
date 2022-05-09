@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class Helper : Employee
 {
-    [SerializeField] private Garden _garden;
+    [SerializeField] private Transform _productionResource;
     [SerializeField] private ResourceStorage _resourceStorage;
+
+    public Transform ProductionResource => _productionResource;
+    public Transform ResourceStorage => _resourceStorage.transform;
 
     #region MonoBehaviour
     private void Start()
     {
-        Move(_garden.transform);
+        Move(_productionResource);
     } 
     #endregion
-   
 }

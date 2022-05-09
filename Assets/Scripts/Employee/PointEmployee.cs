@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class SpawnerEmployee : MonoBehaviour
+public class PointEmployee : MonoBehaviour
 {
     [SerializeField] private Canvas _canvas;
     [SerializeField] private GameObject _employee;
@@ -27,7 +27,7 @@ public class SpawnerEmployee : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.TryGetComponent(out Player player))
+        if (other.TryGetComponent(out Player player))
         {
             _isHavePlayer = true;
             ChangeScaleInformationCanvas(_canvas.transform.localScale * 1.2f);
@@ -46,7 +46,7 @@ public class SpawnerEmployee : MonoBehaviour
     {
         _progress = progress;
     }
-    
+
     public void Active()
     {
         _employee.SetActive(true);
@@ -57,36 +57,35 @@ public class SpawnerEmployee : MonoBehaviour
     {
         _canvas.transform.DOScale(scale, 0.5f);
     }
-    
+
     private IEnumerator BuyEmployee(Player player)
     {
         yield return new WaitForSeconds(1.2f);
 
-        while(_costValue > 0)
+        while (_costValue > 0)
         {
             if (!_isHavePlayer)
             {
                 yield break;
             }
-            
+
             if (player.CashData.Cash == 0)
             {
                 Debug.Log("Не хватает денег");
                 break;
             }
-            
-            var i = UnityEngine.Random.Range(2, 20);
-
-            int withdrawCash = (player.CashData.Cash >= i) ? ((i > _costValue) ? _costValue : i) : player.CashData.Cash;
+   
+            int amountWithdrawal = UnityEngine.Random.Range(2, 40);
+            int withdrawCash = (player.CashData.Cash >= amountWithdrawal) ? ((amountWithdrawal > _costValue) ? _costValue : amountWithdrawal) : player.CashData.Cash;
             player.CashData.WithdrawCash(withdrawCash);
 
-            //Debug.Log($"i: {i} _costValue: {_costValue}");
             _costValue -= withdrawCash;
             _cost.text = _costValue.ToString();
 
             yield return new WaitForSeconds(0.15f);         
         }
-        //_progress.IncreaseProgress();
-        // Active();
+
+        _progress.IncreaseProgress();
+        Active();
     }
 }

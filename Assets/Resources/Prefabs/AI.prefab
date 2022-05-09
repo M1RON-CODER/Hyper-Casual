@@ -1335,7 +1335,7 @@ GameObject:
   - component: {fileID: 7886216152725778564}
   - component: {fileID: 2013015462144302372}
   m_Layer: 0
-  m_Name: Bot
+  m_Name: AI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

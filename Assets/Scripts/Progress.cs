@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class Progress : MonoBehaviour
 {
-    [SerializeField] private List<SpawnerEmployee> _employees;
+    [SerializeField] private List<List<PointEmployee>> _objects;
     private int _progressIndex;
 
     public int ProgressIndex => _progressIndex;
@@ -30,7 +30,7 @@ public class Progress : MonoBehaviour
     {
         for (int i = 0; i < _progressIndex; i++)
         {
-            _employees[i].Active();
+            _objects[i].Active();
         }
 
         ShowNextObject();
@@ -38,10 +38,10 @@ public class Progress : MonoBehaviour
 
     private void ShowNextObject()
     {
-        if (_progressIndex < _employees.Count)
+        if (_progressIndex < _objects.Count)
         {
-            _employees[_progressIndex].Initialize(this);
-            _employees[_progressIndex].gameObject.SetActive(true);
+            _objects[_progressIndex].Initialize(this);
+            _objects[_progressIndex].gameObject.SetActive(true);
         }
     }
 }

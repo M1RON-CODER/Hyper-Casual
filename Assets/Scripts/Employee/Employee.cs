@@ -10,7 +10,7 @@ public abstract class Employee : MonoBehaviour
 {
     [SerializeField] private Transform _hands;
 
-    private Stack<Resource.ResourceParams> _resourcesOnHands = new();
+    private List<Resource.ResourceBase> _resourcesOnHands = new();
     private NavMeshAgent _agent;
     private Animator _animator;
     private int _maxCountOnHands;
@@ -18,6 +18,7 @@ public abstract class Employee : MonoBehaviour
     
     public NavMeshAgent Agent => _agent;
     public Animator Animator => _animator;
+    public List<Resource.ResourceBase> ResourcesOnHands => _resourcesOnHands;
 
     #region MonoBehaviour
     private void Awake()
@@ -40,11 +41,19 @@ public abstract class Employee : MonoBehaviour
         resourceObj.transform.SetParent(_hands);
         resourceObj.transform.DOLocalMove(position, 0.2f);
 
-        _resourcesOnHands.Push(new Resource.ResourceParams { Obj = resourceObj, Resource = resource });
+        _resourcesOnHands.Insert(0, new Resource.ResourceBase { Obj = resourceObj, Resource = resource });
 
         AnimationAdjustment();
 
         return false;
+    }
+
+    public void RemoveResourceFromHands(Resource.ResourceBase resource)
+    {
+        _resourcesOnHands.Remove(resource);
+        resource.Obj.transform.SetParent(null);
+
+        AnimationAdjustment();
     }
 
     public void Move(Transform position)
@@ -65,7 +74,7 @@ public abstract class Employee : MonoBehaviour
         {
             yield return new WaitForSeconds(0.3f);
             
-            if (_agent.remainingDistance <= 0.1f)
+            if (_agent.remainingDistance <= 0.3f)
             {
                 Stop();
                 yield break;
@@ -81,7 +90,7 @@ public abstract class Employee : MonoBehaviour
         }
 
         Vector3 position = Vector3.zero;
-        foreach (Resource.ResourceParams resource in _resourcesOnHands)
+        foreach (Resource.ResourceBase resource in _resourcesOnHands)
         {
             position.y += resource.Obj.transform.localScale.y;
         }

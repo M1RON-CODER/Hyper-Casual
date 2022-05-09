@@ -1,7 +1,5 @@
 using DG.Tweening;
 using MoreMountains.NiceVibrations;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : Player
@@ -33,32 +31,32 @@ public class PlayerController : Player
     }
     #endregion
 
-    public bool AddResourcesOnHands(Resource.Resources resource, GameObject resourceObj)
+    public override bool AddResourceOnHands(Resource.Resources resource, GameObject resourceObject)
     {
         if (ResourcesOnHands.Count >= MaxCountOnHands)
         {
             return true;
         }
-        
-        Vector3 position = GetPositionForResourceOnHands();
-        resourceObj.transform.SetParent(Hands);
-        resourceObj.transform.DOLocalMove(position, 0.2f);
 
-        ResourcesOnHands.Insert(0, (new Resource.ResourceParams { Obj = resourceObj, Resource = resource }));
+        Vector3 position = GetPositionForResourceOnHands();
+        resourceObject.transform.SetParent(Hands);
+        resourceObject.transform.DOLocalMove(position, 0.2f);
+
+        ResourcesOnHands.Insert(0, new Resource.ResourceBase { Obj = resourceObject, Resource = resource });
 
         AnimationAdjustment();
         MMVibrationManager.Haptic(HapticTypes.LightImpact, false, true, this);
 
         return false;
     }
-    
-    public void RemoveResourceFromHands(Resource.ResourceParams resource)
+
+    public override void RemoveResourceFromHands(Resource.ResourceBase resource)
     {
         if (ResourcesOnHands.Count == 0)
         {
             return;
         }
-        
+
         resource.Obj.transform.SetParent(null);
         ResourcesOnHands.Remove(resource);
 
@@ -75,7 +73,7 @@ public class PlayerController : Player
     {
         _isEntry = false;
     }
-    
+
     private Vector3 GetPositionForResourceOnHands()
     {
         if (ResourcesOnHands.Count == 0)
@@ -84,15 +82,15 @@ public class PlayerController : Player
         }
 
         Vector3 position = Vector3.zero;
-        foreach (Resource.ResourceParams resource in ResourcesOnHands)
+        foreach (Resource.ResourceBase resource in ResourcesOnHands)
         {
             position.y += resource.Obj.transform.localScale.y;
         }
 
-        return position;    
+        return position;
     }
 
-    private void AnimationAdjustment()
+    public override void AnimationAdjustment()
     {
         if (ResourcesOnHands.Count > 0)
         {
@@ -101,7 +99,7 @@ public class PlayerController : Player
 
             Animator.SetBool(Keys.Animation.Idle.ToString(), false);
             Animator.SetBool(Keys.Animation.Running.ToString(), false);
-            
+
             _currentAnimation = Keys.Animation.CarryingRunning.ToString();
         }
         else

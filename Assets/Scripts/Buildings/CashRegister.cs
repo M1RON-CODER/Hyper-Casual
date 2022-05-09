@@ -6,7 +6,6 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 
-[RequireComponent(typeof(Cash))]
 public class CashRegister : MonoBehaviour
 {
     public class Queue
@@ -41,11 +40,11 @@ public class CashRegister : MonoBehaviour
     }
     
     [SerializeField] private Box _boxPrefab;
+    [SerializeField] private Cash _cash;
     [SerializeField] private Transform _boxPosition;
     [SerializeField] private List<Transform> _AIPositions = new();
 
     private List<Queue> _queues = new();
-    private Cash _cash;
     private bool _isHaveCashier;
     private bool _isHavePlayer;
 
@@ -55,8 +54,6 @@ public class CashRegister : MonoBehaviour
     private void Awake()
     {
         Initialize();
-
-        _cash = GetComponent<Cash>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -64,8 +61,6 @@ public class CashRegister : MonoBehaviour
         if(other.TryGetComponent(out Player player))
         {
             _isHavePlayer = true;
-            
-            _cash.WithdrawCash(player); 
             
             if(!_isHaveCashier)
                 Serve();
