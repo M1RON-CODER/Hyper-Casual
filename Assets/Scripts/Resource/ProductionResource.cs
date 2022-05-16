@@ -12,7 +12,7 @@ public class ProductionResource : Resource
 
     private List<GameObject> _resources = new ();
     private PlayerController _playerController;
-    private Helper _helper;
+    private Assistant _helper;
 
     #region MonoBehaviour
     private void Start()
@@ -32,7 +32,7 @@ public class ProductionResource : Resource
             }
         }
 
-        if (other.TryGetComponent(out Helper helper))
+        if (other.TryGetComponent(out Assistant helper))
         {
             _helper = helper;
             _helper.Stop();
@@ -51,7 +51,7 @@ public class ProductionResource : Resource
             _playerController = null;
         }
 
-        if (other.TryGetComponent(out Helper helper))
+        if (other.TryGetComponent(out Assistant helper))
         {
             _helper = null;
         }
@@ -73,7 +73,7 @@ public class ProductionResource : Resource
         Invoke(nameof(InstantiateResources), _delayInstatiateResources);
     }
 
-    private void TakeResource(Helper helper)
+    private void TakeResource(Assistant helper)
     {
         foreach (GameObject resource in _resources.ToList())
         {
@@ -103,6 +103,7 @@ public class ProductionResource : Resource
 
             Vector3 endScale = resource.transform.localScale;
             resource.transform.localScale = Vector3.zero;
+            resource.transform.rotation = new Quaternion(0, 180, 0, 0);
             resource.transform.DOScale(endScale, _easing);
         }
 

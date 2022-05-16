@@ -37,7 +37,7 @@ public class ResourceStorage : Resource
             sequence.OnComplete(() => { AllocateResourcesBuyer(buyer); }).SetDelay(0.25f);
         }
 
-        if (other.TryGetComponent(out Helper helper))
+        if (other.TryGetComponent(out Assistant helper))
         {
             AddResourceToStorage(helper);
         }
@@ -81,6 +81,7 @@ public class ResourceStorage : Resource
             player.RemoveResourceFromHands(resource);
             _resources.Insert(0, resource.Obj);
             resource.Obj.transform.DOMove(_resourcePositions[_resources.Count - 1].position, 0.3f);
+            resource.Obj.transform.DOLocalRotate(new Vector3(0, 180, 0), 0.3f);
         }
 
         sequence.OnComplete(() =>
@@ -90,7 +91,7 @@ public class ResourceStorage : Resource
         .SetDelay(0.3f);
     }
 
-    protected void AddResourceToStorage(Helper? helper)
+    protected void AddResourceToStorage(Assistant? helper)
     {
         if ((_resources.Count == _resourcePositions.Count) || (helper.ResourcesOnHands.Count == 0))
         {

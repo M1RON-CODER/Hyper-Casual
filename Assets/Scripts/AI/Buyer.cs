@@ -235,7 +235,6 @@ public class Buyer : AI
             if (Agent.remainingDistance <= 0.1f)
             {
                 int index = _cashRegister.CurrentIndex(this);
-                Debug.Log($"index in queye: {index} ({this.gameObject.name})");
                 if (index == 0)
                 {
                     if (_cashRegister.Queues[index].OnSpot)

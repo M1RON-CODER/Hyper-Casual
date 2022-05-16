@@ -1,6 +1,9 @@
 using DG.Tweening;
+using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using TMPro;
 using UnityEngine;
 
@@ -14,8 +17,10 @@ public class PointProgress : MonoBehaviour
     private bool _isPlayerEntry;
     private Vector3 _startCanvasScale;
     private Progress _progress;
-
+    
     public GameObject Object => _object;
+    public int CostValue => _costValue;
+    
 
     #region MonoBehaviour
     private void Start()
@@ -74,7 +79,7 @@ public class PointProgress : MonoBehaviour
                 break;
             }
    
-            int amountWithdrawal = Random.Range(2, 40);
+            int amountWithdrawal = UnityEngine.Random.Range(2, 40);
             int withdrawCash = (player.CashData.Cash >= amountWithdrawal) ? ((amountWithdrawal > _costValue) ? _costValue : amountWithdrawal) : player.CashData.Cash;
             player.CashData.WithdrawCash(withdrawCash);
 
@@ -84,7 +89,7 @@ public class PointProgress : MonoBehaviour
             yield return new WaitForSeconds(0.15f);         
         }
 
-        _progress.IncreaseProgress();
+        //_progress.IncreaseProgress();
         Active();
     }
 }

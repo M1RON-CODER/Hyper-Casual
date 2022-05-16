@@ -220,7 +220,12 @@ public class Outline : MonoBehaviour {
 
   List<Vector3> SmoothNormals(Mesh mesh) {
 
-    // Group vertices by location
+        // Group vertices by location
+/*        if (gameObject.activeInHierarchy)
+        {
+            var smooth = new List<Vector3>();
+            return smooth;        
+        }*/
     var groups = mesh.vertices.Select((vertex, index) => new KeyValuePair<Vector3, int>(vertex, index)).GroupBy(pair => pair.Key);
 
     // Copy normals to a new list

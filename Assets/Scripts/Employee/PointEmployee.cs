@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,14 +8,14 @@ using UnityEngine;
 
 public class PointEmployee : MonoBehaviour
 {
-    [SerializeField] private Canvas _canvas;
-    [SerializeField] private GameObject _employee;
-    [SerializeField] private TMP_Text _cost;
+    [JsonIgnore] [SerializeField] private Canvas _canvas;
+    [JsonIgnore] [SerializeField] private GameObject _employee;
+    [JsonIgnore] [SerializeField] private TMP_Text _cost;
     [SerializeField] private int _costValue;
 
-    private bool _isHavePlayer;
-    private Vector3 _startCanvasScale;
-    private Progress _progress;
+    [JsonIgnore] private bool _isHavePlayer;
+    [JsonIgnore] private Vector3 _startCanvasScale;
+    [JsonIgnore] private Progress _progress;
 
     public GameObject Employee => _employee;
 
@@ -85,7 +86,7 @@ public class PointEmployee : MonoBehaviour
             yield return new WaitForSeconds(0.15f);         
         }
 
-        _progress.IncreaseProgress();
+        //_progress.IncreaseProgress();
         Active();
     }
 }

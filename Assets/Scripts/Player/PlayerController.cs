@@ -1,5 +1,6 @@
 using DG.Tweening;
 using MoreMountains.NiceVibrations;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerController : Player
@@ -41,9 +42,9 @@ public class PlayerController : Player
         Vector3 position = GetPositionForResourceOnHands();
         resourceObject.transform.SetParent(Hands);
         resourceObject.transform.DOLocalMove(position, 0.2f);
+        resourceObject.transform.DOLocalRotate(Vector3.zero, 0.2f);
 
         ResourcesOnHands.Insert(0, new Resource.ResourceBase { Obj = resourceObject, Resource = resource });
-
         AnimationAdjustment();
         MMVibrationManager.Haptic(HapticTypes.LightImpact, false, true, this);
 
@@ -59,6 +60,13 @@ public class PlayerController : Player
 
         resource.Obj.transform.SetParent(null);
         ResourcesOnHands.Remove(resource);
+
+/*        Vector3 position = Vector3.zero;
+        for (int i = ResourcesOnHands.Count - 1; i >= 0; i--)
+        {
+            ResourcesOnHands[i].Obj.transform.position = position;
+            position.y += ResourcesOnHands[i].Obj.transform.localScale.y;
+        }*/
 
         AnimationAdjustment();
         MMVibrationManager.Haptic(HapticTypes.LightImpact, false, true, this);

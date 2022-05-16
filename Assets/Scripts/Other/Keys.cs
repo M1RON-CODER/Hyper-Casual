@@ -21,12 +21,16 @@ public class Keys
         PlayerMaxCountOnHands,
         PlayerLevel,
         GetCash,
-        ProgressIndex,
-        UnderProgressIndex,
     }
 
     public enum AIPrefs
     {
         HelperMaxCountOnHands,
+    }
+
+    public enum Progress
+    {
+        ProgressIndex,
+        UnderProgressIndex,
     }
 }
