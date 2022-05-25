@@ -1,22 +1,25 @@
 using DG.Tweening;
+using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+[JsonObject(MemberSerialization = MemberSerialization.OptIn)]
 public class Cash : MonoBehaviour
 {
     [SerializeField] private GameObject _cashPrefab;
     [SerializeField] private List<Transform> _cashPositions = new();
     [Min(3)] [SerializeField] private int _productCost = 3;
 
+    [JsonProperty("Cost Amount")] private int _cashAmount;
     private List<GameObject> _cash = new();
     private Player _player;
-    private int _cashAmount;
     private int _cashPosition;
     private int _maxMoneyHeight = 8;
 
     public int ProductCost => _productCost;
+    public int CashAmount => _cashAmount;
 
     #region MonoBehaviour
     private void OnTriggerEnter(Collider other)
@@ -33,6 +36,11 @@ public class Cash : MonoBehaviour
         _player = null;
     }
     #endregion
+
+    public void Initialize(int cash)
+    {
+        AddCashOnCashRegister(null, cash);
+    }
 
     public void AddCashOnCashRegister(Transform playerPosition, int cash)
     {
@@ -56,16 +64,12 @@ public class Cash : MonoBehaviour
             {
                 cashObj.transform.position = playerPosition.position;
                 cashObj.SetActive(true);
-                
-                Debug.Log("Cash is Pooled");
             }
             else
             {
                 cashObj = Instantiate(_cashPrefab, playerPosition.position, Quaternion.identity);
                 cashObj.transform.SetParent(transform);
                 _cash.Add(cashObj);
-
-                Debug.Log("Cash is Instantiated");
             }
 
             if (!_player)
@@ -90,13 +94,11 @@ public class Cash : MonoBehaviour
         {
             if ((_cashAmount == 0) || (!_player))
             {
-                Debug.Log("Cash is Empty");
                 yield break;
             }
 
             if (!_cash[i].activeInHierarchy)
             {
-                Debug.Log("Cash is not active");
                 continue;
             }
 
@@ -110,7 +112,6 @@ public class Cash : MonoBehaviour
                 _cashPositions.ForEach(x => x.position -= Vector3.up * 0.25f);
             }
 
-            Debug.Log("Cash is withdrawn");
             yield return new WaitForSeconds(duration);
         }
 

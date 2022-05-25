@@ -5,7 +5,7 @@ using UnityEngine;
 public class Assistant : Employee
 {
     [SerializeField] private Transform _productionResource;
-    [SerializeField] private ResourceStorage _resourceStorage;
+    [SerializeField] private Rack _resourceStorage;
 
     public Transform ProductionResource => _productionResource;
     public Transform ResourceStorage => _resourceStorage.transform;

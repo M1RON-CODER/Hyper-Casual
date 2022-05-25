@@ -6,7 +6,8 @@ public class Sprites : MonoBehaviour
 {
     [SerializeField] private GameObject _firTree;
     [SerializeField] private GameObject _cashRegister;
-    
+    [SerializeField] private GameObject _robot;
+
     private GameObject _currentSprite;
 
     public void SetSprite(Resource.Resources resource)
@@ -21,7 +22,11 @@ public class Sprites : MonoBehaviour
             case Resource.Resources.FirTree:
                 _currentSprite = _firTree;
                 break;
+            case Resource.Resources.Robot:
+                _currentSprite = _robot;
+                break;
             default:
+                _currentSprite = null;
                 break;
         }
 
@@ -41,6 +46,7 @@ public class Sprites : MonoBehaviour
                 _currentSprite = _cashRegister;
                 break;
             default:
+                _currentSprite = null;
                 break;
         }
 
@@ -49,11 +55,11 @@ public class Sprites : MonoBehaviour
 
     private void Show()
     {
-        _currentSprite.gameObject.SetActive(true);
+        _currentSprite.gameObject?.SetActive(true);
     }
 
     private void Hide()
     {
-        _currentSprite.gameObject.SetActive(false);
+        _currentSprite.gameObject?.SetActive(false);
     }
 }

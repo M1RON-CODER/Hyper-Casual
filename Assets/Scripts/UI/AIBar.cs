@@ -33,7 +33,6 @@ public class AIBar : MonoBehaviour
     {
         _sprites.SetSprite(building);
         _demand.gameObject.SetActive(false);    
-        //RefreshData();
     }
 
     public void SetData(Resource.Resources resource, int currentCount, int totalCount)

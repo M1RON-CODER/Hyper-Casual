@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-public class ResourceStorage : Resource
+public class Rack : Resource, IRack
 {
     [SerializeField] private List<Transform> _resourcePositions = new ();
+    [SerializeField] private Transform _botPosition;
 
     private List<GameObject> _resources = new ();
     private List<Buyer> _buyer = new ();
-
     private PlayerController _player;
 
     public new List<GameObject> Resources => _resources;
+    public Transform BotPosition => _botPosition;
 
     #region MonoBehaviour
     private void OnTriggerEnter(Collider other)
@@ -25,7 +26,7 @@ public class ResourceStorage : Resource
 
         if (other.TryGetComponent(out Buyer buyer))
         {
-            if (buyer.CurrentTarget == null)
+            if ((buyer.CurrentTarget == null) || (buyer.CurrentTarget.Resource != CurrentResource))
             {
                 return;
             }
@@ -37,9 +38,9 @@ public class ResourceStorage : Resource
             sequence.OnComplete(() => { AllocateResourcesBuyer(buyer); }).SetDelay(0.25f);
         }
 
-        if (other.TryGetComponent(out Assistant helper))
+        if (other.TryGetComponent(out Assistant assistant))
         {
-            AddResourceToStorage(helper);
+            AddResourceToStorage(assistant);
         }
     }
 

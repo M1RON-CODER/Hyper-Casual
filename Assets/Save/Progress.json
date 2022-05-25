@@ -1,6 +1,6 @@
 [
   {
-    "employees": [
+    "progressPoints": [
       {
         "Cost": 0
       },
@@ -10,9 +10,9 @@
     ]
   },
   {
-    "employees": [
+    "progressPoints": [
       {
-        "Cost": 168
+        "Cost": 0
       }
     ]
   }

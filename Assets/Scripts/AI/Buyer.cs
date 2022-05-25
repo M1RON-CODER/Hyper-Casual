@@ -8,26 +8,26 @@ public class Buyer : AI
 {
     public class TargetParams
     {
-        private Transform _waypoint;
+        private Transform _rack;
         private Resource.Resources _resource;
-        private int _currentCoutResources;
+        private int _coutResources;
         private int _totalCountResources;
 
-        public TargetParams(Transform wayPoint, Resource.Resources resource, int totalCountResources)
+        public TargetParams(Transform rack, Resource.Resources resource, int totalCountResources)
         {
-            _waypoint = wayPoint;
+            _rack = rack;
             _resource = resource;
             _totalCountResources = totalCountResources;
         }
 
-        public Transform Waypoint => _waypoint;
+        public Transform Rack => _rack;
         public Resource.Resources Resource => _resource;
-        public int CurrentCountResources => _currentCoutResources;
+        public int CountResources => _coutResources;
         public int TotalCountResources => _totalCountResources;
 
         public void CurrentResourcePlusOne()
         {
-            _currentCoutResources++;
+            _coutResources++;
         }
     }
 
@@ -64,11 +64,11 @@ public class Buyer : AI
         Animator.SetBool(_currentAnimation, false);
     }
 
-    public void SetTargets(List<GameObject> waypoints)
+    public void SetTargets(List<Rack> racks)
     {
-        foreach (GameObject waypoint in waypoints)
+        foreach (Rack rack in racks)
         {
-            _targets.Add(new TargetParams(waypoint.transform, waypoint.GetComponent<Resource>().CurrentResource, Random.Range(1, 4)));
+            _targets.Add(new TargetParams(rack.BotPosition, rack.CurrentResource, Random.Range(1, 4)));
         }
 
         MoveWaypoint();
@@ -82,22 +82,25 @@ public class Buyer : AI
         }
         
         Sequence sequence = DOTween.Sequence();
-        int count = (_currentTarget.TotalCountResources <= resources.Count) ? _currentTarget.TotalCountResources : resources.Count;
-        int currentCount = _currentTarget.CurrentCountResources;
+        // int count = (_currentTarget.TotalCountResources <= resources.Count) ? _currentTarget.TotalCountResources : resources.Count;
         
-        for (int i = currentCount, index = 0; i < count; i++)
+        for (int i = _currentTarget.CountResources, index = 0; i < _currentTarget.TotalCountResources; i++)
         {
+            if(resources.Count == 0)
+            {
+                return false;
+            }
+
             Vector3 position = GetPositionForResourceOnHands();
             resources[index].transform.SetParent(Hands);
             sequence.Append(resources[index].transform.DOLocalJump(position, 1, 1, 0.3f).OnStart(() => 
-            { 
-                
+            {
                 _currentTarget.CurrentResourcePlusOne();
-                AIBar.RefreshData(_currentTarget.CurrentCountResources, _currentTarget.TotalCountResources);
+                AIBar.RefreshData(_currentTarget.CountResources, _currentTarget.TotalCountResources);
 
             }).OnComplete(() =>
             {
-                if (_currentTarget.CurrentCountResources == _currentTarget.TotalCountResources)
+                if (_currentTarget.CountResources == _currentTarget.TotalCountResources)
                 {
                     sequence.OnComplete(() =>
                     {
@@ -113,7 +116,7 @@ public class Buyer : AI
         AnimationAdjustment();
         Animator.SetBool(_currentAnimation, false);
 
-        return count == _currentTarget.TotalCountResources;
+        return _currentTarget.CountResources == _currentTarget.TotalCountResources;
     }
 
     public void AddBoxToHands(GameObject box)
@@ -179,10 +182,10 @@ public class Buyer : AI
         TargetParams target = _targets.First();
         _currentTarget = target;
         
-        Agent.destination = target.Waypoint.position;
+        Agent.destination = target.Rack.position;
         Move();
         
-        AIBar.SetData(target.Resource, target.CurrentCountResources, target.TotalCountResources);
+        AIBar.SetData(target.Resource, target.CountResources, target.TotalCountResources);
     }
 
     private void MoveToCashRegister()

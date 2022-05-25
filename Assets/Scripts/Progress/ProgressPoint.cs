@@ -1,32 +1,27 @@
 using DG.Tweening;
 using Newtonsoft.Json;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
 using TMPro;
 using UnityEngine;
 
-public class PointProgress : MonoBehaviour
+[JsonObject(MemberSerialization = MemberSerialization.OptIn)]
+public class ProgressPoint : MonoBehaviour, IProgress 
 {
     [SerializeField] private Canvas _canvas;
-    [SerializeField] private GameObject _object;
     [SerializeField] private TMP_Text _cost;
-    [SerializeField] private int _costValue;
+    [SerializeField] [Min(0)] [JsonProperty("Cost")] private int _costPrice;
 
+    private Progress _progress;
     private bool _isPlayerEntry;
     private Vector3 _startCanvasScale;
-    private Progress _progress;
-    
-    public GameObject Object => _object;
-    public int CostValue => _costValue;
-    
+
+    public int Cost => _costPrice;
 
     #region MonoBehaviour
     private void Start()
     {
         _startCanvasScale = _canvas.transform.localScale;
-        _cost.text = _costValue.ToString();
+        _cost.text = _costPrice.ToString();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -38,7 +33,7 @@ public class PointProgress : MonoBehaviour
             StartCoroutine(BuyObject(player));
         }
     }
-    
+
     private void OnTriggerExit(Collider other)
     {
         ChangeScaleInformationCanvas(_startCanvasScale);
@@ -51,10 +46,19 @@ public class PointProgress : MonoBehaviour
         _progress = progress;
     }
 
-    public void Active()
+    public virtual void Activate()
     {
-        _object.SetActive(true);
         gameObject.SetActive(false);
+    }
+
+    public void Show()
+    {
+        gameObject.SetActive(true);
+    }
+
+    public void SetPrice(int price)
+    {
+        _costPrice = price;
     }
 
     private void ChangeScaleInformationCanvas(Vector3 scale)
@@ -66,30 +70,33 @@ public class PointProgress : MonoBehaviour
     {
         yield return new WaitForSeconds(1.2f);
 
-        while (_costValue > 0)
+        while (_costPrice > 0)
         {
             if (!_isPlayerEntry)
             {
+                JSON.SaveProgress(_progress.Objects);
                 yield break;
             }
 
             if (player.CashData.Cash == 0)
             {
-                Debug.Log("Не хватает денег");
+                Debug.Log("No money");
                 break;
             }
-   
+
             int amountWithdrawal = UnityEngine.Random.Range(2, 40);
-            int withdrawCash = (player.CashData.Cash >= amountWithdrawal) ? ((amountWithdrawal > _costValue) ? _costValue : amountWithdrawal) : player.CashData.Cash;
+            int withdrawCash = (player.CashData.Cash >= amountWithdrawal) ? ((amountWithdrawal > _costPrice) ? _costPrice : amountWithdrawal) : player.CashData.Cash;
             player.CashData.WithdrawCash(withdrawCash);
 
-            _costValue -= withdrawCash;
-            _cost.text = _costValue.ToString();
+            _costPrice -= withdrawCash;
+            _cost.text = _costPrice.ToString();
 
-            yield return new WaitForSeconds(0.15f);         
+            yield return new WaitForSeconds(0.15f);
         }
 
-        //_progress.IncreaseProgress();
-        Active();
+        _progress.IncreaseProgress();
+        JSON.SaveProgress(_progress.Objects);
+        Activate();
+        _progress.ShowNextObject();
     }
 }

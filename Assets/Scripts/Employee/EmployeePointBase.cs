@@ -3,9 +3,9 @@ using TMPro;
 using DG.Tweening;
 using UnityEngine;
 
-public class EmployeePointBase : MonoBehaviour, IProgress
+public class EmployeePointBase : MonoBehaviour
 {
-    [SerializeField] private Canvas _canvas;
+/*    [SerializeField] private Canvas _canvas;
     [SerializeField] private GameObject _object;
     [SerializeField] private TMP_Text _cost;
 
@@ -95,5 +95,5 @@ public class EmployeePointBase : MonoBehaviour, IProgress
         _progress.Save();
         Activate();
         _progress.ShowNextObject();
-    }
+    }*/
 }

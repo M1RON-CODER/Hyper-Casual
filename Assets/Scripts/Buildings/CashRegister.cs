@@ -1,7 +1,9 @@
 using DG.Tweening;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -47,8 +49,10 @@ public class CashRegister : MonoBehaviour
     private List<Queue> _queues = new();
     private bool _isHaveCashier;
     private bool _isHavePlayer;
+    private const string _fileName = "CashRegister.json";    
 
     public List<Queue> Queues => _queues;
+    public Cash Cash => _cash;
 
     #region MonoBehaviour
     private void Awake()
@@ -91,7 +95,6 @@ public class CashRegister : MonoBehaviour
             Sequence sequence = DOTween.Sequence();
             if ((queue.AI != null) && queue.OnSpot)
             {
-                Debug.Log(queue.AI.name + " Serve");
                 Box box = InstantiateBox(queue);
                 sequence
                     .OnComplete(() => 
