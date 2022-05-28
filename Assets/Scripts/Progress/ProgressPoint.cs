@@ -70,6 +70,7 @@ public class ProgressPoint : MonoBehaviour, IProgress
     {
         yield return new WaitForSeconds(1.2f);
 
+        int amountWithdrawal = 2;
         while (_costPrice > 0)
         {
             if (!_isPlayerEntry)
@@ -83,13 +84,13 @@ public class ProgressPoint : MonoBehaviour, IProgress
                 Debug.Log("No money");
                 break;
             }
-
-            int amountWithdrawal = UnityEngine.Random.Range(2, 40);
+            
             int withdrawCash = (player.CashData.Cash >= amountWithdrawal) ? ((amountWithdrawal > _costPrice) ? _costPrice : amountWithdrawal) : player.CashData.Cash;
             player.CashData.WithdrawCash(withdrawCash);
 
             _costPrice -= withdrawCash;
             _cost.text = _costPrice.ToString();
+            amountWithdrawal += 2;
 
             yield return new WaitForSeconds(0.15f);
         }
