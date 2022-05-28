@@ -8,6 +8,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 
+[JsonObject(MemberSerialization = MemberSerialization.OptIn)]
 public class CashRegister : MonoBehaviour
 {
     public class Queue
@@ -42,7 +43,7 @@ public class CashRegister : MonoBehaviour
     }
     
     [SerializeField] private Box _boxPrefab;
-    [SerializeField] private Cash _cash;
+    [SerializeField][JsonProperty("Cash")] private Cash _cash;
     [SerializeField] private Transform _boxPosition;
     [SerializeField] private List<Transform> _AIPositions = new();
 

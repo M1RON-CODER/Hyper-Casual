@@ -13,19 +13,19 @@ public class JSON : MonoBehaviour
     {
         var json = JsonConvert.SerializeObject(objects, Formatting.Indented, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
         
-        File.WriteAllText($"{Application.dataPath}/Save/{_progressFileName}", json);
+        File.WriteAllText($"{Application.persistentDataPath}/{_progressFileName}", json);
     }
 
     public static void SaveCashRegister(List<CashRegister> cashRegisters)
     {
         var json = JsonConvert.SerializeObject(cashRegisters, Formatting.Indented, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
 
-        File.WriteAllText($"{Application.dataPath}/Save/{_cashRegisterFileName}", json);
+        File.WriteAllText($"{Application.persistentDataPath}/{_cashRegisterFileName}", json);
     }
 
     public static List<Progress.Object> ReadFileProgress(List<Progress.Object> objects)
     {
-        string path = $"{Application.dataPath}/Save/{_progressFileName}";
+        string path = $"{Application.persistentDataPath}/{_progressFileName}";
         if (!File.Exists(path))
         {
             SaveProgress(objects);
@@ -46,7 +46,7 @@ public class JSON : MonoBehaviour
 
     public static List<CashRegister> ReadFileCashRegister(List<CashRegister> cashRegisters)
     {
-        string path = $"{Application.dataPath}/Save/{_cashRegisterFileName}";
+        string path = $"{Application.persistentDataPath}/{_cashRegisterFileName}";
         if (!File.Exists(path))
         {
             SaveCashRegister(cashRegisters);

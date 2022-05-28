@@ -12,14 +12,14 @@ public class Cash : MonoBehaviour
     [SerializeField] private List<Transform> _cashPositions = new();
     [Min(3)] [SerializeField] private int _productCost = 3;
 
-    [JsonProperty("Cost Amount")] private int _cashAmount;
+    private int _cashAmount;
     private List<GameObject> _cash = new();
     private Player _player;
     private int _cashPosition;
     private int _maxMoneyHeight = 8;
 
     public int ProductCost => _productCost;
-    public int CashAmount => _cashAmount;
+    [JsonProperty("Cost Amount")] public int CashAmount => _cashAmount;
 
     #region MonoBehaviour
     private void OnTriggerEnter(Collider other)
@@ -39,7 +39,7 @@ public class Cash : MonoBehaviour
 
     public void Initialize(int cash)
     {
-        AddCashOnCashRegister(null, cash);
+        InstantiateCash(cash);
     }
 
     public void AddCashOnCashRegister(Transform playerPosition, int cash)
@@ -133,6 +133,32 @@ public class Cash : MonoBehaviour
         });
     }
 
+    private void InstantiateCash(int cash)
+    {
+        int count = cash / _productCost;
+        for (int i = 0; i < count; i++)
+        {
+            if (_cashPosition >= _cashPositions.Count)
+            {
+                if ((_cashAmount / _productCost / _cashPositions.Count) >= _maxMoneyHeight)
+                {
+                    continue;
+                }
+
+                _cashPosition = 0;
+                _cashPositions.ForEach(x => x.position += Vector3.up * 0.25f);
+            }
+
+            GameObject cashObj = Instantiate(_cashPrefab, _cashPositions[_cashPosition].position, Quaternion.identity);
+            cashObj.transform.SetParent(transform);
+            _cash.Add(cashObj);
+
+            _cashPosition++;
+        }
+
+        _cashAmount = cash;
+    }
+    
     private GameObject GetPooledObject()
     {
         foreach(GameObject poolObject in _cash)

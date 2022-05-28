@@ -1,18 +1,18 @@
 [
   {
-    "progressPoints": [
+    "Progress Point": [
       {
-        "Cost": 0
+        "Cost": 200
       },
       {
-        "Cost": 0
+        "Cost": 314
       }
     ]
   },
   {
-    "progressPoints": [
+    "Progress Point": [
       {
-        "Cost": 0
+        "Cost": 500
       }
     ]
   }

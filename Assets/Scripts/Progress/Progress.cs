@@ -10,14 +10,13 @@ public class Progress : MonoBehaviour
     [Serializable]
     public class Object
     {
-        public List<ProgressPoint> progressPoints = new ();
+        [JsonProperty("Progress Point")] public List<ProgressPoint> progressPoints = new ();
     }
 
     [SerializeField] private List<Object> _objects = new ();
     [SerializeField] private AIManager _AIManager;
 
     private int _progressIndex;
-    private const string _fileName = "Progress.json";
 
     public List<Object> Objects => _objects;
 
@@ -93,25 +92,5 @@ public class Progress : MonoBehaviour
             }
         }
     }
-
-    
-/*    private void ReadFromSave()
-    {
-        string path = $"{Application.dataPath}/Save/{_fileName}";
-        if (!File.Exists(path))
-        {
-            Save();
-            return;
-        }
-        
-        var json = JsonConvert.DeserializeObject<List<Object>>(File.ReadAllText(path));
-        for (int i = 0; i < json.Count; i++)
-        {
-            for (int j = 0; j < json[i].progressPoints.Count; j++)
-            {
-                _objects[i].progressPoints[j].SetPrice(json[i].progressPoints[j].Cost);
-            }
-        }
-    }*/
 }
 

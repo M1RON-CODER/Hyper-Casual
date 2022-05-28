@@ -22,7 +22,9 @@ public class AIManager : MonoBehaviour
 
     private void Start()
     {
+        _cashRegisters = JSON.ReadFileCashRegister(_cashRegisters);
         _maxCountByers = _racks.Count * _maxCountAIOnOneRack;
+
         _racksIndexes = new int[_racks.Count];
         for (int i = 0; i < _racks.Count; i++)
         {
@@ -30,6 +32,15 @@ public class AIManager : MonoBehaviour
         }
 
         StartCoroutine(CreateBot());
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        Debug.Log(pauseStatus);
+        if (pauseStatus)
+        {
+            JSON.SaveCashRegister(_cashRegisters);
+        }
     }
     #endregion
 
