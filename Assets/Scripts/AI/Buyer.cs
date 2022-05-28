@@ -36,6 +36,7 @@ public class Buyer : AI
     private AIManager _AIManager;
     private TargetParams _currentTarget;
     private Transform _exitPoint;
+    private Sequence _sequence = DOTween.Sequence();
     private string _currentAnimation = Keys.Animation.Idle.ToString();
 
     public AIManager AIManager => _AIManager;
@@ -74,49 +75,37 @@ public class Buyer : AI
         MoveWaypoint();
     }
 
-    public bool AddResourceOnHands(List<GameObject> resources)
+    public bool AddResourceOnHands(GameObject resource)
     {
         if(_currentTarget == null)
         {
             return false;
         }
         
-        Sequence sequence = DOTween.Sequence();
-        // int count = (_currentTarget.TotalCountResources <= resources.Count) ? _currentTarget.TotalCountResources : resources.Count;
-        
-        for (int i = _currentTarget.CountResources, index = 0; i < _currentTarget.TotalCountResources; i++)
+        Vector3 position = GetPositionForResourceOnHands();
+        resource.transform.SetParent(Hands);
+        _sequence.Append(resource.transform.DOLocalJump(position, 1, 1, 0.3f).OnStart(() => 
         {
-            if(resources.Count == 0)
-            {
-                return false;
-            }
+            _currentTarget.CurrentResourcePlusOne();
+            AIBar.RefreshData(_currentTarget.CountResources, _currentTarget.TotalCountResources);
 
-            Vector3 position = GetPositionForResourceOnHands();
-            resources[index].transform.SetParent(Hands);
-            sequence.Append(resources[index].transform.DOLocalJump(position, 1, 1, 0.3f).OnStart(() => 
+        }).OnComplete(() =>
+        {
+            if (_currentTarget.CountResources == _currentTarget.TotalCountResources)
             {
-                _currentTarget.CurrentResourcePlusOne();
-                AIBar.RefreshData(_currentTarget.CountResources, _currentTarget.TotalCountResources);
-
-            }).OnComplete(() =>
-            {
-                if (_currentTarget.CountResources == _currentTarget.TotalCountResources)
+                _sequence.OnComplete(() =>
                 {
-                    sequence.OnComplete(() =>
-                    {
-                        NextTarget();
-                    });
-                }
-            }));
+                    NextTarget();
+                });
+            }
+        }));
             
-            ResourcesOnHands.Insert(0, resources[index]);
-            resources.Remove(resources[index]);
-        }
+        ResourcesOnHands.Insert(0, resource);
         
         AnimationAdjustment();
         Animator.SetBool(_currentAnimation, false);
 
-        return _currentTarget.CountResources == _currentTarget.TotalCountResources;
+        return _currentTarget.CountResources >= _currentTarget.TotalCountResources;
     }
 
     public void AddBoxToHands(GameObject box)

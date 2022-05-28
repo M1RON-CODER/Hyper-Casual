@@ -143,9 +143,15 @@ public class Rack : Resource, IRack
     {
         foreach (Buyer buyer in _buyer.ToList())
         {
-            if (buyer.AddResourceOnHands(_resources))
+            foreach (GameObject resource in _resources)
             {
-                _buyer.Remove(buyer);
+                if (buyer.AddResourceOnHands(resource))
+                {
+                    _buyer.Remove(buyer);
+                    break;
+                }
+
+                _resources.Remove(resource);
             }
         }
 
@@ -159,9 +165,15 @@ public class Rack : Resource, IRack
             return;
         }
 
-        if (buyer.AddResourceOnHands(_resources))
+        foreach (GameObject resource in _resources)
         {
-            _buyer.Remove(buyer);
+            if (buyer.AddResourceOnHands(resource))
+            {
+                _buyer.Remove(buyer);
+                break;
+            }
+
+            _resources.Remove(resource);
         }
 
         AddResourceToStorage(_player);
