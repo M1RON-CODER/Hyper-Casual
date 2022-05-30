@@ -11,6 +11,7 @@ public class Rack : Resource, IRack
     private List<GameObject> _resources = new ();
     private List<Buyer> _buyer = new ();
     private PlayerController _player;
+    private Assistant _assistan;
 
     public new List<GameObject> Resources => _resources;
     public Transform BotPosition => _botPosition;
@@ -40,6 +41,7 @@ public class Rack : Resource, IRack
 
         if (other.TryGetComponent(out Assistant assistant))
         {
+            _assistan = assistant;
             AddResourceToStorage(assistant);
         }
     }
@@ -50,12 +52,18 @@ public class Rack : Resource, IRack
         {
             _player = null;
         }
+        
+        if (other.TryGetComponent(out Assistant assistant))
+        {
+            _assistan = null;
+        }
 
         if (other.TryGetComponent(out Buyer buyer))
         {
             buyer.Move();
             _buyer.Remove(buyer);
         }
+
     }
     #endregion
 
@@ -92,15 +100,15 @@ public class Rack : Resource, IRack
         .SetDelay(0.3f);
     }
 
-    protected void AddResourceToStorage(Assistant? helper)
+    protected void AddResourceToStorage(Assistant? assistant)
     {
-        if ((_resources.Count == _resourcePositions.Count) || (helper.ResourcesOnHands.Count == 0))
+        if ((_resources.Count == _resourcePositions.Count) || (assistant.ResourcesOnHands.Count == 0))
         {
             return;
         }
 
         Sequence sequence = DOTween.Sequence();
-        foreach (ResourceBase resource in helper.ResourcesOnHands.ToList())
+        foreach (ResourceBase resource in assistant.ResourcesOnHands.ToList())
         {
             if (_resources.Count >= _resourcePositions.Count)
             {
@@ -112,12 +120,12 @@ public class Rack : Resource, IRack
                 continue;
             }
 
-            helper.RemoveResourceFromHands(resource);
+            assistant.RemoveResourceFromHands(resource);
             _resources.Insert(0, resource.Obj);
             resource.Obj.transform.DOMove(_resourcePositions[_resources.Count - 1].position, 0.3f);
         }
 
-        helper.Move(helper.ProductionResource);
+        assistant.Move(assistant.ProductionResource);
 
         sequence.OnComplete(() =>
         {
@@ -149,7 +157,10 @@ public class Rack : Resource, IRack
             }
         }
 
-        AddResourceToStorage(_player);
+        if(_player != null)
+            AddResourceToStorage(_player);
+        else
+            AddResourceToStorage(_assistan);
     }
 
     private void AllocateResourcesBuyer(Buyer buyer)
@@ -164,6 +175,9 @@ public class Rack : Resource, IRack
             _buyer.Remove(buyer);
         }
 
-        AddResourceToStorage(_player);
+        if (_player != null)
+            AddResourceToStorage(_player);
+        else
+            AddResourceToStorage(_assistan);
     }
 }
