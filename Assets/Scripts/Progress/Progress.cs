@@ -23,7 +23,6 @@ public class Progress : MonoBehaviour
     #region MonoBehaviour
     private void Awake()
     {
-        PlayerPrefs.SetInt(Keys.Progress.ProgressIndex.ToString(), 1);
         _progressIndex = PlayerPrefs.GetInt(Keys.Progress.ProgressIndex.ToString(), 0);
 
         FirstInitialize();
@@ -61,7 +60,7 @@ public class Progress : MonoBehaviour
             }
         }
     }
-
+    
     private void ActivateObjects()
     {
         for (int i = 0; i <= _progressIndex; i++)
@@ -75,6 +74,10 @@ public class Progress : MonoBehaviour
                     {
                         _AIManager.AddRack(buildingPoint.Rack);
                     }
+                }
+                else
+                {
+                    _objects[i].progressPoints[j].Deactivate();
                 }
             }
         }

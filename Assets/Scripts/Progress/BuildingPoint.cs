@@ -16,4 +16,11 @@ public class BuildingPoint : ProgressPoint
         _rack.gameObject.SetActive(true);
         _productionResource.gameObject.SetActive(true);
     }
+
+    public override void Deactivate()
+    {
+        base.Deactivate();
+        _rack.gameObject.SetActive(false);
+        _productionResource.gameObject.SetActive(false);
+    }
 }

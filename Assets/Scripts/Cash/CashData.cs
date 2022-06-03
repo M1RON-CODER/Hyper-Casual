@@ -12,7 +12,7 @@ public class CashData : MonoBehaviour
     #region MonoBehaviour
     private void OnValidate()
     {
-        SaveCash();
+        // SaveCash();
     }
     private void Awake()
     {

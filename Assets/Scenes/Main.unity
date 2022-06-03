@@ -1318,7 +1318,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: HELPER
+  m_text: ASSISTANT
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1345,8 +1345,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 19.9
-  m_fontSizeBase: 19.9
+  m_fontSize: 16.39
+  m_fontSizeBase: 16.39
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -6859,7 +6859,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd7eba2af433de445997388601630365, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cashPrefab: {fileID: 3002539543551272590, guid: d456297abca27b646abd8317e73387dd,
+  _cashPrefab: {fileID: 470984696935184859, guid: 2a4d526720b9afc42b2e2a37a3df0b7a,
     type: 3}
   _cashPositions:
   - {fileID: 157991648}
@@ -10584,7 +10584,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'TOY
+  m_text: 'ROBOT
 
 '
   m_isRightToLeft: 0

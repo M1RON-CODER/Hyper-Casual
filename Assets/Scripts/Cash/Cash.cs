@@ -12,14 +12,14 @@ public class Cash : MonoBehaviour
     [SerializeField] private List<Transform> _cashPositions = new();
     [Min(3)] [SerializeField] private int _productCost = 3;
 
-    private int _cashAmount;
+    [JsonProperty("Cost Amount")] private int _cashAmount;
     private List<GameObject> _cash = new();
     private Player _player;
     private int _cashPosition;
     private int _maxMoneyHeight = 8;
 
     public int ProductCost => _productCost;
-    [JsonProperty("Cost Amount")] public int CashAmount => _cashAmount;
+    public int CashAmount => _cashAmount;
 
     #region MonoBehaviour
     private void OnTriggerEnter(Collider other)
@@ -111,6 +111,8 @@ public class Cash : MonoBehaviour
             {
                 _cashPositions.ForEach(x => x.position -= Vector3.up * 0.25f);
             }
+
+            _player.CashData.AddCash(_productCost);
 
             yield return new WaitForSeconds(duration);
         }

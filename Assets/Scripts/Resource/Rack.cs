@@ -60,7 +60,7 @@ public class Rack : Resource, IRack
 
         if (other.TryGetComponent(out Buyer buyer))
         {
-            buyer.Move();
+            // buyer.Move();
             _buyer.Remove(buyer);
         }
 

@@ -51,6 +51,11 @@ public class ProgressPoint : MonoBehaviour, IProgress
         gameObject.SetActive(false);
     }
 
+    public virtual void Deactivate()
+    {
+        gameObject.SetActive(true);
+    }
+
     public void Show()
     {
         gameObject.SetActive(true);

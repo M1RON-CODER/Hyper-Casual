@@ -17,6 +17,7 @@ public class AIManager : MonoBehaviour
     private int[] _racksIndexes;
     private int _maxCountByers;
     private int _numberAI;
+    private bool _isPaused;
 
     #region MonoBehavior
 
@@ -34,10 +35,15 @@ public class AIManager : MonoBehaviour
         StartCoroutine(CreateBot());
     }
 
-    private void OnApplicationPause(bool pauseStatus)
+    private void OnApplicationFocus(bool hasFocus)
     {
-        Debug.Log(pauseStatus);
-        if (pauseStatus)
+        _isPaused = !hasFocus;
+    }
+
+    void OnApplicationPause(bool pauseStatus)
+    {
+        _isPaused = pauseStatus;
+        if (_isPaused)
         {
             JSON.SaveCashRegister(_cashRegisters);
         }

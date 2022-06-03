@@ -54,6 +54,7 @@ public class JSON : MonoBehaviour
         }
 
         var json = JsonConvert.DeserializeObject<List<CashRegister>>(File.ReadAllText(path));
+        
         for (int i = 0; i < json.Count; i++)
         {
             cashRegisters[i].Cash.Initialize(json[i].Cash.CashAmount);

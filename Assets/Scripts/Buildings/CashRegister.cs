@@ -43,14 +43,13 @@ public class CashRegister : MonoBehaviour
     }
     
     [SerializeField] private Box _boxPrefab;
-    [SerializeField][JsonProperty("Cash")] private Cash _cash;
+    [SerializeField] [JsonProperty("Cash")] private Cash _cash;
     [SerializeField] private Transform _boxPosition;
     [SerializeField] private List<Transform> _AIPositions = new();
 
     private List<Queue> _queues = new();
     private bool _isHaveCashier;
-    private bool _isHavePlayer;
-    private const string _fileName = "CashRegister.json";    
+    private bool _isHavePlayer;   
 
     public List<Queue> Queues => _queues;
     public Cash Cash => _cash;
