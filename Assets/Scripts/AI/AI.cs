@@ -43,22 +43,18 @@ public abstract class AI : MonoBehaviour, IHumanoid
     {
     }
 
-    private void FaceTarget(Vector3 destination)
-    {
-        Vector3 lookPos = destination - transform.position;
-        lookPos.y = 0;
-        Quaternion rotation = Quaternion.LookRotation(lookPos);
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, 1f);
-    }
 
-    public virtual void Move(Vector3 destination)
+    public virtual void Move()
     {
         _agent.isStopped = false;
-        FaceTarget(destination);
     }
 
     public virtual void Stop()
     {
         _agent.isStopped = true;
+    }
+
+    private void FaceTarget()
+    {
     }
 }

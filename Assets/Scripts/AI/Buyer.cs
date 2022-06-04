@@ -48,9 +48,9 @@ public class Buyer : AI
         _exitPoint = exitPoint ?? throw new System.ArgumentNullException(nameof(exitPoint));
     }
 
-    public override void Move(Vector3 destination)
+    public override void Move()
     {
-        base.Move(destination);
+        base.Move();
 
         AnimationAdjustment();
         Animator.SetBool(_currentAnimation, true);
@@ -164,7 +164,7 @@ public class Buyer : AI
     public void MovePosition(Transform point)
     {        
         Agent.destination = point.position;
-        Move(point.position);
+        Move();
         StartCoroutine(StopDistance());
     }
    
@@ -183,7 +183,7 @@ public class Buyer : AI
         _currentTarget = target;
         
         Agent.destination = target.Rack.position;
-        Move(target.Rack.position);
+        Move();
 
         AIBar.SetData(target.Resource, target.CountResources, target.TotalCountResources);
     }
@@ -223,7 +223,7 @@ public class Buyer : AI
             
             if (Agent.remainingDistance <= 0.1f)
             {
-                Stop();
+                // Stop();
                 yield break;
             }
         }

@@ -9,19 +9,15 @@ public class CashData : MonoBehaviour
     [SerializeField] private Canvases _canvases;
     [SerializeField] private int _cash;
 
+    public int Cash => _cash;
+
     #region MonoBehaviour
-    private void OnValidate()
-    {
-        // SaveCash();
-    }
     private void Awake()
     {
         _cash = PlayerPrefs.GetInt(Keys.PlayerPrefs.Cash.ToString());
         RefreshCash();
     }
     #endregion
-
-    public int Cash => _cash;
 
     public void AddCash(int cash)
     {

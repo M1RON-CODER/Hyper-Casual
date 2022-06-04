@@ -86,8 +86,7 @@ public class ProgressPoint : MonoBehaviour, IProgress
 
             if (player.CashData.Cash == 0)
             {
-                Debug.Log("No money");
-                break;
+                yield break;
             }
             
             int withdrawCash = (player.CashData.Cash >= amountWithdrawal) ? ((amountWithdrawal > _costPrice) ? _costPrice : amountWithdrawal) : player.CashData.Cash;
