@@ -11,37 +11,6 @@ using UnityEngine;
 [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
 public class CashRegister : MonoBehaviour
 {
-    public class Queue
-    {
-        private Transform _position;
-        private Buyer _AI;
-        private bool _isBusyPlace;
-        private bool _onSpot;
-
-        public Queue(Transform position)
-        {
-            _position = position;
-            _AI = null;
-            _isBusyPlace = false;
-        }
-
-        public Transform Position => _position;
-        public Buyer AI => _AI;
-        public bool IsBusyPlace => _isBusyPlace;
-        public bool OnSpot => _onSpot; 
-
-        public void SetBusyPlace(Buyer AI)
-        {
-            _AI = AI;
-            _isBusyPlace = true;
-        }
-
-        public void SetOnSpot(bool onSpot)
-        {
-            _onSpot = onSpot;
-        }
-    }
-    
     [SerializeField] private Box _boxPrefab;
     [SerializeField] [JsonProperty("Cash")] private Cash _cash;
     [SerializeField] private Transform _boxPosition;
