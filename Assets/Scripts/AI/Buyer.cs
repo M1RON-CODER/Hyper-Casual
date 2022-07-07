@@ -6,13 +6,14 @@ using UnityEngine;
 
 public class Buyer : AI
 {
-    private List<TargetParams> _targets = new();
+    private IReadOnlyList<TargetParams> _targets;
     private CashRegister _cashRegister;
     private AIManager _AIManager;
     private TargetParams _currentTarget;
     private Transform _exitPoint;
     private string _currentAnimation = Keys.Animation.Idle.ToString();
 
+    private IReadOnlyList<TargetParams> Targets => _targets;
     public AIManager AIManager => _AIManager;
     public TargetParams CurrentTarget => _currentTarget;
 
@@ -41,11 +42,14 @@ public class Buyer : AI
 
     public void SetTargets(List<Rack> racks)
     {
+        List<TargetParams> targets = new();
         foreach (Rack rack in racks)
         {
-            _targets.Add(new TargetParams(rack.BotPosition, rack.CurrentResource, Random.Range(1, 4)));
+            targets.Add(new TargetParams(rack.BotPosition, rack.CurrentResource, Random.Range(1, 4)));
         }
 
+        Debug.Log($"Count: {targets.Count} (Set Target)");
+        _targets = targets;
         MoveWaypoint();
     }
 
@@ -122,9 +126,9 @@ public class Buyer : AI
 
         if(_targets.Count - 1 > 0)
         {
-            _targets.Remove(_targets.FirstOrDefault());
-            
-            _currentTarget = _targets.First();
+            //_targets.ToList().Remove(_targets.FirstOrDefault());
+
+            //_currentTarget = _targets.First();
             MoveWaypoint();
         }
         else
@@ -154,9 +158,12 @@ public class Buyer : AI
 
     private void MoveWaypoint()
     {
+        Debug.Log($"Targets count: {_targets.Count}");
         TargetParams target = _targets.First();
+        Debug.Log($"Target[0]: {_targets[0]}");
+        Debug.Log($"Target first: {target} (Move Waypoint)");
         _currentTarget = target;
-        
+        Debug.Log($"Current target: {_currentTarget} (Move Waypoint)");
         Agent.destination = target.Rack.position;
         Move();
 
@@ -166,7 +173,7 @@ public class Buyer : AI
     private void MoveToCashRegister()
     {
         int index = _cashRegister.UnoccupiedPlace();
-        CashRegister.Queue queue = _cashRegister.Queues[index];
+        Queue queue = _cashRegister.Queues[index];
         queue.SetBusyPlace(this);
         
         MovePosition(queue.Position);
@@ -198,7 +205,7 @@ public class Buyer : AI
             
             if (Agent.remainingDistance <= 0.1f)
             {
-                // Stop();
+                Stop();
                 yield break;
             }
         }

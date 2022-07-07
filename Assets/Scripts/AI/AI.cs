@@ -43,7 +43,6 @@ public abstract class AI : MonoBehaviour, IHumanoid
     {
     }
 
-
     public virtual void Move()
     {
         _agent.isStopped = false;
@@ -54,7 +53,7 @@ public abstract class AI : MonoBehaviour, IHumanoid
         _agent.isStopped = true;
     }
 
-    private void FaceTarget()
+    private void FacingTarget()
     {
     }
 }
