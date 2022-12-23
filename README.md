@@ -5,8 +5,6 @@
 The game was made on the game "My mini market"
 
 
-I made 3d models, programming code, particles, testing.
-
 Sounds downloaded from free site: https://www.freesfx.co.uk/
 
 # Game process
